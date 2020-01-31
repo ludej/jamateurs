@@ -73,6 +73,7 @@ function scene:create( event )
 	-- We need physics started to add bodies, but we don't want the simulaton
 	-- running until the scene is on the screen.
 	physics.start()
+	physics.setGravity(0, 20)
 	physics.pause()
 
 
@@ -91,7 +92,7 @@ function scene:create( event )
 	crate.rotation = 15
 
 	-- add physics to the crate
-	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0.3 } )
+	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0 } )
 
 	-- create a grass object and add physics (with custom shape)
 	local grass = display.newImageRect( "grass.png", screenW, 82 )
