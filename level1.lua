@@ -11,7 +11,8 @@ local scene = composer.newScene()
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed, upPressed
-local crate
+local crate, explodingThing
+local playerInContactWith = nil
 
 
 -- Called when a key event has been received
@@ -35,10 +36,18 @@ local function onKeyEvent( event )
 
 	if event.keyName == "up" then
 		if event.phase == "down" then
-			-- crate:applyLinearImpulse( 0, -0.75, crate.x, crate.y )
 			crate:setLinearVelocity(0, -500)
 		end
 	end
+
+	if event.keyName == "e" then
+		if event.phase == "down" then
+			if playerInContactWith then
+				display.remove(playerInContactWith)
+			end
+		end
+	end
+
 
     -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
     -- This lets the operating system execute its default handling of the key
@@ -53,6 +62,26 @@ local function gameLoop()
 	if rightPressed then
 		crate.x = crate.x + 10
 	end
+end
+
+
+local function onCollision( event )
+
+    if ( event.phase == "began" ) then
+        local obj1 = event.object1
+        local obj2 = event.object2
+		if ((obj1.myName == "player" and obj2.myName == "explodingThing") or
+			(obj1.myName == "explodingThing" and obj2.myName == "player")) then
+			playerInContactWith = explodingThing
+		end
+	elseif ( event.phase == "ended" ) then
+		local obj1 = event.object1
+        local obj2 = event.object2
+		if ((obj1.myName == "player" and obj2.myName == "explodingThing") or
+			(obj1.myName == "explodingThing" and obj2.myName == "player")) then
+			playerInContactWith = nil
+		end
+    end
 end
 
 
@@ -90,6 +119,7 @@ function scene:create( event )
 	crate = display.newImageRect( "crate.png", 90, 90 )
 	crate.x, crate.y = 160, -100
 	crate.rotation = 15
+	crate.myName = "player"
 
 	-- add physics to the crate
 	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0 } )
@@ -101,6 +131,11 @@ function scene:create( event )
 	--  draw the grass at the very bottom of the screen
 	grass.x, grass.y = display.screenOriginX, display.actualContentHeight + display.screenOriginY
 
+	explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
+	explodingThing.x, explodingThing.y = 1500, 950
+	physics.addBody(explodingThing, "static", { isSensor=true })
+	explodingThing.myName = "explodingThing"
+
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local grassShape = { -halfW,-34, halfW,-34, halfW,34, -halfW,34 }
 	physics.addBody( grass, "static", { friction=0.3, shape=grassShape } )
@@ -109,6 +144,7 @@ function scene:create( event )
 	sceneGroup:insert( background )
 	sceneGroup:insert( grass)
 	sceneGroup:insert( crate )
+	sceneGroup:insert( explodingThing )
 end
 
 
@@ -127,6 +163,7 @@ function scene:show( event )
 		rightPressed = false
 		Runtime:addEventListener( "key", onKeyEvent )
 		gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
+		Runtime:addEventListener( "collision", onCollision )
 		physics.start()
 	end
 end
