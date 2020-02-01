@@ -12,7 +12,7 @@ local arnold,player
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local crate, entrancePortal, exit, explodingThing
+local crate, entrancePortal, exit, explodingThing, lever, winch
 local playerInContactWith = nil
 local gameLoopTimer
 local canDoubleJump
@@ -276,11 +276,31 @@ function scene:create( event )
   physics.addBody(exit, "static", { isSensor=true })
 	exit.myName = "exit"
 
-    arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
-    arnold:scale(0.5,0.5)
-    arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
-    arnold.alpha = 0
-    arnold.myName = "arnold"
+  arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
+  arnold:scale(0.5,0.5)
+  arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
+  arnold.alpha = 0
+  arnold.myName = "arnold"
+  
+  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+	lever.anchorX = 0
+	lever.anchorY = 1
+	--  draw the grass at the very bottom of the screen
+	lever.x, lever.y = 0, 225
+
+	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
+	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	physics.addBody( lever, "static", { friction=0.3 } )
+  
+  local winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
+	winch.anchorX = 0
+	winch.anchorY = 1
+	--  draw the grass at the very bottom of the screen
+	winch.x, winch.y = 750, 880
+
+	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
+	local winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	physics.addBody( winch, "static", { friction=0.3 } )
 
     --explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
 	--explodingThing.x, explodingThing.y = 500, 950
