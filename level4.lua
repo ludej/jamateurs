@@ -42,7 +42,7 @@ local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", ar
 
 
 local arnoldSequenceData = {
-    {name="running", start=1, count=8, time=575, loopCount=0}
+    {name="running", start=1, count=6, time=575, loopCount=0}
   }
 
 local arnoldMovements = {
@@ -260,16 +260,69 @@ local function onCollision( event )
     end
 end
 
-local function createPlatform (positionX, positionY, width)
-  local platform = display.newImageRect( "Images/Scene/platform.png", width, 41)
-	platform.anchorX = 0
-	platform.anchorY = 0
-	--  draw the grass at the very bottom of the screen
-	platform.x, platform.y = positionX, positionY
+local function createPlatform (positionX, positionY, typePlatform)
+  local platform
+  if (typePlatform == "A") then
+    
+     platform = display.newImageRect("Images/Scene/background/platform_A.png", 206, 92 )
+     local nwA, nhA = platform.width*scaleX*0.9, platform.height*scaleY*0.5
+     physics.addBody( platform, "static", { friction=0.3, shape ={-nwA,-nhA,nwA,-nhA,nwA,nhA,-nwA,nhA} })
+     platform.anchorX = 0.5
+     platform.anchorY = 0.5
+     
+   elseif (typePlatform == "B") then
+     platform = display.newImageRect( "Images/Scene/background/platform_B.png", 350, 62)
+     local nwB, nhB = platform.width*scaleX*0.9, platform.height*scaleY*0.7 
+     physics.addBody( platform, "static", { friction=0.3, shape ={-nwB,-nhB,nwB,-nhB,nwB,nhB,-nwB,nhB} })
+     platform.anchorX = 0.5
+     platform.anchorY = 0.5
+     
+   elseif (typePlatform == "C") then
+     platform = display.newImageRect( "Images/Scene/background/platform_C.png", 503, 82)
+     local nwC, nhC = platform.width*scaleX*0.95, platform.height*scaleY*0.6 
+     physics.addBody( platform, "static", { friction=0.3, shape ={-nwC,-nhC,nwC,-nhC,nwC,nhC,-nwC,nhC} })
+     platform.anchorX = 0.5
+     platform.anchorY = 0.45
+     
+   elseif (typePlatform == "D") then
+     platform = display.newImageRect( "Images/Scene/background/platform_D.png", 845, 70)
+     local nwD, nhD = platform.width*scaleX*0.97, platform.height*scaleY*0.7 
+     physics.addBody( platform, "static", { friction=0.3, shape ={-nwD,-nhD,nwD,-nhD,nwD,nhD,-nwD,nhD} })
+     platform.anchorX = 0.49
+     platform.anchorY = 0.5
+     
+   elseif (typePlatform == "AP") then
+     platform = display.newImageRect( "Images/Scene/background/platform_plant_A.png", 232, 199)
+     physics.addBody( platform, "static", { friction=0.3, shape ={-80,35, 90,35, 90,75, -80,75} })
+     platform.anchorX = 0.5
+     platform.anchorY = 0.5
+     
+   elseif (typePlatform == "BP") then
+     platform = display.newImageRect( "Images/Scene/background/platform_plant_B.png", 348, 128)
+     physics.addBody( platform, "static", { friction=0.3, shape ={-165,5 , 160,5 , 160,50  , -165,50} })
+     platform.anchorX = 0.5
+     platform.anchorY = 0.5
+     
+   elseif (typePlatform == "CP") then
+     platform = display.newImageRect( "Images/Scene/background/platform_plant_C.png", 505, 195)
+     physics.addBody( platform, "static", { friction=0.3, shape ={-233,32 , 235,32 , 235,72 , -235,70} })
+     platform.anchorX = 0.5
+     platform.anchorY = 0.5
+     
+   elseif (typePlatform == "DP") then
+     platform = display.newImageRect( "Images/Scene/background/platform_plant_D.png", 841, 197)
+     physics.addBody( platform, "static", { friction=0.3, shape ={-420.5,45 , 400,45 , 400,85 , -420,85} })
+     platform.anchorX = 0.5
+     platform.anchorY = 0.5
+     
+   end
+   
+   
+   platform.x, platform.y = positionX, positionY
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( platform, "static", { friction=0.3 } )
+	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	
   end
 -- include Corona's "physics" library
 local physics = require "physics"
@@ -398,13 +451,14 @@ function scene:create( event )
 
 
   local platforms = {
-      createPlatform (300, 840, 400),
-      createPlatform (1385, 870, 535),
-      createPlatform (1200, 639, 400),
-      createPlatform (700, 439, 400),
-      createPlatform (0, 239, 200),
-      createPlatform (400, 239, 300),
-      createPlatform (1520, 239, 400),
+      createPlatform (300, 840, "C"),
+      createPlatform (1385, 870, "B"),
+      createPlatform (1200, 639, "A"),
+      createPlatform (700, 439, "D"),
+      createPlatform (116, 239, "AP"),
+      createPlatform (400, 239, "BP"),
+      createPlatform (1520, 239, "CP"),
+      createPlatform (1500, 100, "DP"),
     }
 
     --sendArnie()
