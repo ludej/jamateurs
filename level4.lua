@@ -41,12 +41,13 @@ local scaleX,scaleY = 0.5,0.5
 
 
 -- Character movement animation
-local playerSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1260, sheetContentHeight= 210 }
-local playerSheet1 = graphics.newImageSheet("/Images/Character/heroRun.png", playerSheetData)
+local playerSheetData = {width = 210, height = 210, numFrames = 10, sheetContentWidth = 2100, sheetContentHeight= 210 }
+local playerSheet1 = graphics.newImageSheet("/Images/Character/heroAnim.png", playerSheetData)
 
 
 local playerSequenceData = {
-    {name="running", start=1, count=6, time=575, loopCount=0}
+    {name="idle", start=1, count=4, time=575, loopCount=0},
+    {name="running", start=5, count=6, time=575, loopCount=0}
   }
 
 -- Arnold movement animation
@@ -195,11 +196,13 @@ local function gameLoop()
 	end
 
     if(leftPressed or rightPressed) then
-        if(player.isPlaying == false) then
+        if player.sequence ~= "running" then
+            player:setSequence("running")
             player:play()
-        else
-            player:pause()
         end
+    elseif player.sequence ~= "idle" then
+        player:setSequence("idle")
+        player:play()
     end
 end
 
@@ -285,9 +288,9 @@ function gameOver()
   timer.cancel(gameLoopTimer)
   timer.cancel(shootLoopTimer)
   timer.cancel(countDownTimer)
-  
+
   Runtime:removeEventListener("key", onKeyEvent)
-  Runtime:removeEventListener("collision", onCollision)  
+  Runtime:removeEventListener("collision", onCollision)
 
   countDownTimer = timer.performWithDelay( 2000, leaveGame, 1 )
 end
@@ -527,7 +530,8 @@ function scene:create( event )
   player = display.newSprite(playerSheet1, playerSequenceData)
   player.x, player.y = 1900, 950
   player.myName = "player"
-  player:setSequence("running")
+  player:setSequence("idle")
+  player:play()
 
   entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 300)
   entrancePortal.x, entrancePortal.y = 160, 781
