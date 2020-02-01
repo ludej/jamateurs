@@ -49,8 +49,8 @@ local arnoldSequenceData = {
   }
   
   -- Enemy idle animation
-local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1260, sheetContentHeight= 210 }
-local enemyIdleSheet = graphics.newImageSheet("/Images/Character/enemyIdle.png", arnoldSheetData)
+local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1470, sheetContentHeight= 210 }
+local enemyIdleSheet = graphics.newImageSheet("/Images/Character/enemyIdle.png", enemyIdleSheetData)
 
 
 local enemyIdleSequenceData = {
@@ -243,7 +243,7 @@ function createEnemy(xPosition, yPosition, type)
   if(type == "enemy") then  
     enemies[enemiesCount]= display.newSprite(enemyIdleSheet, enemyIdleSequenceData)
     enemies[enemiesCount]:setSequence("idle")
-    --enemies[enemiesCount]:play()
+    enemies[enemiesCount]:play()
   elseif(type == "deadEnemy") then
      enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200) 
   end  
