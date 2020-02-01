@@ -29,8 +29,8 @@ local playerSequenceData = {
   }
 
 -- Arnold movement animation
-local arnoldSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
-local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", arnoldSheetData)
+local arnoldSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1380, sheetContentHeight= 210 }
+local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieIdle.png", arnoldSheetData)
 
 
 local arnoldSequenceData = {
