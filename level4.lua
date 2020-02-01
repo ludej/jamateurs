@@ -321,47 +321,6 @@ function scene:create( event )
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
   arnold.alpha = 0
   arnold.myName = "arnold"
-  
-
-  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
-	lever.anchorX = 0
-	lever.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	lever.x, lever.y = 0, 225
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( lever, "static", { friction=0.3 } )
-
-  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-	winch.anchorX = 0
-	winch.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	winch.x, winch.y = 750, 880
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( winch, "static", { lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)})
-	lever.anchorX = 0
-	lever.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	lever.x, lever.y = 0, 225
-  lever.myName = "paka"
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( lever, "static", { isSensor=true } )
-  
-  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-	winch.anchorX = 0
-	winch.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	winch.x, winch.y = 750, 880
-  winch.myName = "navijak"
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( winch, "static", { isSensor=true } )
 
 
     --explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
