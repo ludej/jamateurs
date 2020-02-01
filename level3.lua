@@ -7,11 +7,65 @@
 local composer = require( "composer" )
 local scene = composer.newScene()
 
+local arnold,player
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed, upPressed
 local crate
+
+-- Character movement animation
+local playerSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
+local playerSheet1 = graphics.newImageSheet("/Images/Character/characterAnm.png", playerSheetData)
+
+
+local playerSequenceData = {
+    {name="running", start=1, count=8, time=575, loopCount=0}
+  }
+
+-- Arnold movement animation
+local arnoldSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
+local arnoldSheet1 = graphics.newImageSheet("/Images/Character/pirate3.png", arnoldSheetData)
+
+
+local arnoldSequenceData = {
+    {name="running", start=1, count=8, time=575, loopCount=0}
+  }
+
+local arnoldMovements = {
+    {moveType = "move", delta = -300},
+    {moveType = "move", delta = 550},
+    {moveType = "jump", delta = -500},
+    {moveType = "move", delta = 350},
+    {moveType = "jump", delta = -500},
+    {moveType = "move", delta = -350},
+    {moveType = "move", delta = -300},
+    {moveType = "move", delta = 550},
+    {moveType = "move", delta = 350},
+    {moveType = "jump", delta = -500},
+    {moveType = "move", delta = -350},
+    {moveType = "move", delta = -300},
+    {moveType = "move", delta = 550},
+    {moveType = "jump", delta = -500},
+    {moveType = "move", delta = -300},
+  }
+  
+  local function arnoldMover(index)
+  if(index > #arnoldMovements) then
+    return
+  end
+  
+  if(arnoldMovements[index].moveType == "move") then
+    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].delta, onComplete = function() arnoldMover(index+1) end })
+    --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
+    print("Arnold movement, type  move. Delta : ", arnoldMovements[index].delta)
+  elseif(arnoldMovements[index].moveType == "jump") then 
+      arnold:setLinearVelocity( 0, arnoldMovements[index].delta )
+      arnoldMover(index+1)
+  end 
+  --ArnoldMovement(index+1)
+  --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
+end
 
 
 -- Called when a key event has been received
@@ -47,12 +101,23 @@ end
 
 
 local function gameLoop()
-    if leftPressed then
-		crate.x = crate.x - 10
+     if leftPressed then
+      crate.xScale = -1 
+      crate.x = crate.x - 10
 	end
 	if rightPressed then
 		crate.x = crate.x + 10
+    crate.xScale = 1 
 	end
+  
+  if(leftPressed or rightPressed) then    
+    
+    if(crate.isPlaying == false) then
+      crate:play()
+    end    
+  else
+    crate:pause()
+  end
 end
 
 
@@ -87,12 +152,21 @@ function scene:create( event )
 	background:setFillColor( .5 )
 
 	-- make a crate (off-screen), position it, and rotate slightly
-	crate = display.newImageRect( "crate.png", 90, 90 )
+	crate = display.newSprite(playerSheet1, playerSequenceData)
 	crate.x, crate.y = 160, -100
 	crate.rotation = 15
+	crate.myName = "player"
+  crate:setSequence("running") -- running is defined in pirate sequence data
+  
+   arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
+	arnold.x, arnold.y = 960, 400
+	arnold.myName = "arnold"
+  arnold:setSequence("running")
+  arnold:play()
 
 	-- add physics to the crate
 	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0 } )
+  physics.addBody( arnold, { density=1.0, friction=0.3, bounce=0 } )
 
 	-- create a grass object and add physics (with custom shape)
 	local grass = display.newImageRect( "grass.png", 800, 82)
@@ -128,6 +202,7 @@ function scene:create( event )
 	local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( platform, "static", { friction=0.3 } )
 
+  arnoldMover(1)
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )
 	sceneGroup:insert( grass)

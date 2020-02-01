@@ -8,6 +8,8 @@
 local composer = require( "composer" )
 local scene = composer.newScene()
 
+local arnold
+
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
@@ -22,6 +24,33 @@ local playerSheet1 = graphics.newImageSheet("/Images/Character/characterAnm.png"
 
 local playerSequenceData = {
     {name="running", start=1, count=8, time=575, loopCount=0}
+  }
+  
+-- Arnold movement animation
+local arnoldSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
+local arnoldSheet1 = graphics.newImageSheet("/Images/Character/pirate3.png", arnoldSheetData)
+
+
+local arnoldSequenceData = {
+    {name="running", start=1, count=8, time=575, loopCount=0}
+  }
+  
+local arnoldMovements = {
+    {moveType = "move", delta = -300},
+    {moveType = "move", delta = 550},
+    {moveType = "jump", delta = -500},
+    {moveType = "move", delta = 350},
+    {moveType = "jump", delta = -500},
+    {moveType = "move", delta = -350},
+    {moveType = "move", delta = -300},
+    {moveType = "move", delta = 550},
+    {moveType = "move", delta = 350},
+    {moveType = "jump", delta = -500},
+    {moveType = "move", delta = -350},
+    {moveType = "move", delta = -300},
+    {moveType = "move", delta = 550},
+    {moveType = "jump", delta = -500},
+    {moveType = "move", delta = -300},
   }
 
 
@@ -64,6 +93,22 @@ local function onKeyEvent( event )
     return false
 end
 
+local function arnoldMover(index)
+  if(index > #arnoldMovements) then
+    return
+  end
+  
+  if(arnoldMovements[index].moveType == "move") then
+    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].delta, onComplete = function() arnoldMover(index+1) end })
+    --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
+    print("Arnold movement, type  move. Delta : ", arnoldMovements[index].delta)
+  elseif(arnoldMovements[index].moveType == "jump") then 
+      arnold:setLinearVelocity( 0, arnoldMovements[index].delta )
+      arnoldMover(index+1)
+  end 
+  --ArnoldMovement(index+1)
+  --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
+end
 
 local function gameLoop()
     if leftPressed then
@@ -143,9 +188,16 @@ function scene:create( event )
 	crate.rotation = 15
 	crate.myName = "player"
   crate:setSequence("running") -- running is defined in pirate sequence data
+  
+  arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
+	arnold.x, arnold.y = 960, 400
+	arnold.myName = "arnold"
+  crate:setSequence("running")
+  arnold:play()
 
 	-- add physics to the crate
 	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0 } )
+  physics.addBody( arnold, { density=1.0, friction=0.3, bounce=0 } )
 
 	-- create a grass object and add physics (with custom shape)
 	local grass = display.newImageRect( "grass.png", screenW, 82 )
@@ -168,6 +220,8 @@ function scene:create( event )
 	sceneGroup:insert( grass)
 	sceneGroup:insert( crate )
 	sceneGroup:insert( explodingThing )
+  
+  arnoldMover(1)
 end
 
 
