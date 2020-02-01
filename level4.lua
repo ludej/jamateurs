@@ -47,6 +47,15 @@ local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", ar
 local arnoldSequenceData = {
     {name="running", start=1, count=6, time=575, loopCount=0}
   }
+  
+  -- Enemy idle animation
+local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1260, sheetContentHeight= 210 }
+local enemyIdleSheet = graphics.newImageSheet("/Images/Character/enemyIdle.png", arnoldSheetData)
+
+
+local enemyIdleSequenceData = {
+    {name="idle", start=1, count=7, time=575, loopCount=0}
+  }
 
 local arnoldMovements = {
     {action = "sound", actionData = utils.sounds["hastaLaVista"]},
@@ -232,7 +241,9 @@ end
 function createEnemy(xPosition, yPosition, type)
   enemiesCount = enemiesCount +1 
   if(type == "enemy") then  
-    enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyAlive.png", 200, 200)
+    enemies[enemiesCount]= display.newSprite(enemyIdleSheet, enemyIdleSequenceData)
+    enemies[enemiesCount]:setSequence("idle")
+    --enemies[enemiesCount]:play()
   elseif(type == "deadEnemy") then
      enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200) 
   end  
