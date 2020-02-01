@@ -15,13 +15,14 @@ local sceneGroup
 local flames
 local arnold
 
-local arnieDefaultCountdownTime = 8
+local arnieDefaultCountdownTime = 15
 local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
 local shootLoopTimer
 local gameEnded = false
 local angryArnold = false
+local arnoldMoverIndex =0
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
@@ -84,14 +85,25 @@ local enemyIdleSequenceData = {
   }
 
 local arnoldMovements = {
-    {action = "sound", actionData = utils.sounds["hastaLaVista"]},
+    {action = "idle", actionData = 1000},
+    --{action = "sound", actionData = utils.sounds["hastaLaVista"]},
     {action = "move", actionData = 350},
-    {action = "move", actionData = 350},
+     {action = "jump", actionData = -600},
     {action = "move", actionData = 250},
+    {action = "idle", actionData = 500},
     {action = "jump", actionData = -600},
-    {action = "move", actionData = 650},
+    {action = "move", actionData = -400},
+    {action = "idle", actionData = 500},
+    {action = "jump", actionData = -600},
+    {action = "move", actionData = -270},
+    {action = "idle", actionData = 500},
+    {action = "move", actionData = 400},
+    {action = "idle", actionData = 800},
     {action = "jump", actionData = -500},
-    {action = "move", actionData = -390},
+    {action = "move", actionData = 500},
+    {action = "move", actionData = 320},
+    {action = "idle", actionData = 800},
+    {action = "move", actionData = 300},
   }
 
 local function canArnieKillSomeone()
@@ -109,31 +121,42 @@ local function canArnieKillSomeone()
   end
 end
 
-local function arnoldMover(index)
-  if(index > #arnoldMovements or arnold ==nil or arnold.x == nil or gameEnded== true) then
+local function arnoldMover()
+  arnoldMoverIndex = arnoldMoverIndex + 1
+  if(arnoldMoverIndex > #arnoldMovements or arnold ==nil or arnold.x == nil or gameEnded== true) then
     return
   end
 
-  if(arnoldMovements[index].action == "move") then
-    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].actionData, onComplete = function() arnoldMover(index+1) end })
+  if(arnoldMovements[arnoldMoverIndex].action == "move") then
+    if(arnoldMovements[arnoldMoverIndex].actionData >0) then
+      arnold.xScale =1
+    else
+      arnold.xScale = -1
+    end
+    
+    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[arnoldMoverIndex].actionData, onComplete = function() arnoldMover() end })
     --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
-    print("Arnold movement, type  move. Delta : ", arnoldMovements[index].actionData)
-  elseif(arnoldMovements[index].action == "jump") then
+    print("Arnold movement, type  move. Delta : ", arnoldMovements[arnoldMoverIndex].actionData)
+  elseif(arnoldMovements[arnoldMoverIndex].action == "jump") then
       audio.play( utils.sounds["jump"] )
-      arnold:setLinearVelocity( 0, arnoldMovements[index].actionData )
-      print("Arnold movement, type  jump. actionData : ", arnoldMovements[index].actionData)
-      arnoldMover(index+1)
-  elseif(arnoldMovements[index].action == "shoot") then
-      for i=1,arnoldMovements[index].actionData do
+      arnold:setLinearVelocity( 0, arnoldMovements[arnoldMoverIndex].actionData )
+      print("Arnold movement, type  jump. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
+      arnoldMover(arnoldMoverIndex)
+  elseif(arnoldMovements[arnoldMoverIndex].action == "shoot") then
+      for i=1,arnoldMovements[arnoldMoverIndex].actionData do
 
         utils.fire(arnold)
       end
-      print("Arnold movement, type  shoot. actionData : ", arnoldMovements[index].actionData)
-      arnoldMover(index+1)
-    elseif(arnoldMovements[index].action == "sound") then
-      print("Arnold movement, type  sound. actionData : ", arnoldMovements[index].actionData)
-      audio.play(arnoldMovements[index].actionData)
-      arnoldMover(index+1)
+      print("Arnold movement, type  shoot. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
+      arnoldMover(arnoldMoverIndex)
+    elseif(arnoldMovements[arnoldMoverIndex].action == "sound") then
+      print("Arnold movement, type  sound. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
+      audio.play(arnoldMovements[arnoldMoverIndex].actionData)
+      arnoldMover(arnoldMoverIndex)
+    elseif(arnoldMovements[arnoldMoverIndex].action == "idle") then
+      print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
+      timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
+      
     end
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
@@ -616,6 +639,7 @@ end
 
 function sendArnie()
     angryArnold = false
+    arnoldMoverIndex =0
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
