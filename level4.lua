@@ -3,14 +3,15 @@
 -- level4.lua
 --
 -----------------------------------------------------------------------------------------
-
+--require("mobdebug").start()
 local composer = require( "composer" )
 local utils = require("utils")
+local physics = require ("physics")
 
 local scene = composer.newScene()
 local sceneGroup
 
-local flames 
+local flames
 local arnold,player
 
 local arnieDefaultCountdownTime = 8
@@ -24,7 +25,7 @@ local angryArnold = false
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch, flame
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
 
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
@@ -63,7 +64,7 @@ local flamesSheet1 = graphics.newImageSheet("/Images/Things/flamesAnim.png", fla
 local flamesSequenceData = {
     {name="burning", start=1, count=17, time=1500, loopCount=0}
   }
-  
+
 
   -- Enemy idle animation
 local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1470, sheetContentHeight= 210 }
@@ -87,7 +88,7 @@ local arnoldMovements = {
 
 local function canArnieKillSomeone()
    --print( "Checking hits" )
-  if(arnold==nill or arnold.x == nil) then
+  if(arnold==nil or arnold.x == nil) then
     return
   end
 
@@ -101,7 +102,7 @@ local function canArnieKillSomeone()
 end
 
 local function arnoldMover(index)
-  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill or gameEnded== true) then
+  if(index > #arnoldMovements or arnold ==nil or arnold.x == nil or gameEnded== true) then
     return
   end
 
@@ -206,7 +207,7 @@ local function shootLoop()
   if(angryArnold) then
     utils.fireAtPlayer(arnold,player)
   end
-  
+
   canArnieKillSomeone()
 end
 
@@ -263,6 +264,7 @@ function leaveGame()
   display.remove(exit)
   display.remove(lever)
   display.remove(winch)
+  display.remove(flames)
 
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
@@ -283,6 +285,9 @@ function gameOver()
   timer.cancel(gameLoopTimer)
   timer.cancel(shootLoopTimer)
   timer.cancel(countDownTimer)
+  
+  Runtime:removeEventListener("key", onKeyEvent)
+  Runtime:removeEventListener("collision", onCollision)  
 
   countDownTimer = timer.performWithDelay( 2000, leaveGame, 1 )
 end
@@ -318,6 +323,7 @@ local function onCollision( event )
                 display.remove(bullet)
                 if target.myName == "player" then
                     timer.cancel( gameLoopTimer )
+                    target:pause()
                     display.remove(target)
                     gameOver()
                 elseif(target.myName == "enemy") then
@@ -338,7 +344,7 @@ end
 
 -- Called when a key event has been received
 local function onKeyEvent( event )
-
+    if(gameEnded) then return end
     if event.keyName == "left" then
 		if event.phase == "down" then
 			leftPressed = true
@@ -448,8 +454,7 @@ local function createPlatform (positionX, positionY, typePlatform)
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
  end
--- include Corona's "physics" library
-local physics = require "physics"
+
 
 local function updateTime( event )
     arnieCountdownTime = arnieCountdownTime - 1
@@ -477,7 +482,7 @@ function scene:create( event )
 	-- running until the scene is on the screen.
 	physics.start()
 	physics.setGravity(0, 20)
-	physics.pause()
+	--physics.pause()
 
   --physics.setDrawMode("hybrid") -- shows the physics box around the object
 
@@ -510,9 +515,9 @@ function scene:create( event )
     winch.myName = "winch"
     winch.collision = objectCollide
     winch:addEventListener( "collision" )
-    
-    
-    
+
+
+
   flames = display.newSprite(flamesSheet1, flamesSequenceData)
   flames.x, flames.y = 960, 940
   flames.myName = "flames"
@@ -556,7 +561,7 @@ function scene:create( event )
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( grass, "static", { friction=0.3 } )  
+	physics.addBody( grass, "static", { friction=0.3 } )
 
 
 
@@ -621,7 +626,7 @@ function sendArnie()
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
        print("Arnold is ANGRY///////")
-    end          
+    end
   end
    if(arnold ~= nil) then
     display.remove(arnold)
@@ -660,8 +665,7 @@ function scene:show( event )
       createPlatform (85, 210, "AP"),
       createPlatform (1000, 300, "BP"),
       createPlatform (1750, 270, "B"),
-
-    }
+  }
     leftPressed = false
 	rightPressed = false
     exitIsOpen = false
@@ -673,9 +677,9 @@ function scene:show( event )
 
     arnieCountdownTime = arnieDefaultCountdownTime
         Runtime:addEventListener( "collision", onCollision )
-    physics.start() 
+    physics.start()
     createEnemy(1400,1000,"enemy")
-      
+
 	end
 end
 
