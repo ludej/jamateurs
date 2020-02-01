@@ -16,7 +16,8 @@ local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
 local shootLoopTimer
-local gameOver = false
+local gameEnded = false
+local angryArnold = false
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
@@ -89,7 +90,7 @@ local function canArnieKillSomeone()
 end
 
 local function arnoldMover(index)
-  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill or gameOver== true) then
+  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill or gameEnded== true) then
     return
   end
 
@@ -243,6 +244,10 @@ local function gameLoop()
 end
 
 local function shootLoop()
+  if(angryArnold) then
+    utils.fireAtPlayer(arnold,player)
+  end
+  
   canArnieKillSomeone()
 end
 
@@ -301,10 +306,8 @@ function leaveGame()
   composer.gotoScene("menu", "slideRight")  
 end
 
-
-
 function gameOver()
-  gameOver = true
+  gameEnded = true
   gameoverBackground = display.newRect( 0, 0 , display.contentWidth* 1.25, display.contentHeight * 1.25)
       gameoverBackground.x =display.contentWidth*0.5
       gameoverBackground.y = display.contentHeight*0.5
@@ -597,7 +600,13 @@ local function teleportIn()
 end
 
 function sendArnie()
-
+    angryArnold = false
+    for i=1,#enemies do
+    if(enemies[i] and enemies[i].myName=="deadEnemy") then
+       angryArnold = true
+       print("Arnold is ANGRY///////")
+    end          
+  end
    if(arnold ~= nil) then
     display.remove(arnold)
    end
