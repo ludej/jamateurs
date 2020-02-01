@@ -324,7 +324,7 @@ function scene:create( event )
   local scaleX,scaleY = 0.5,0.5
   crate:scale(scaleX,scaleY)
   local nw, nh = crate.width*scaleX*1, crate.height*scaleY*0.8
-	physics.addBody(
+	physics.addBody( 
         crate, "dynamic",
         { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} },
         { box={ halfWidth=30, halfHeight=10, x=0, y=95 }, isSensor=true  }
