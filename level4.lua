@@ -50,18 +50,6 @@ local arnoldMovements = {
     {action = "move", actionData = 350},
   }
 
-  -- Shoot a gun
-  local function fire(shooter)
-      local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
-      physics.addBody(bullet, "dynamic", {isSensor=true})
-      bullet.isBullet = true
-      bullet.myName = "bullet"
-      bullet.x = shooter.x + 100
-      bullet.y = shooter.y
-      transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
-      audio.play(utils.sounds["shooting"][math.random(1, #utils.sounds["shooting"])])
-  end
-
 local function canArnieKillSomeone()
    --print( "Checking hits" )
   if(arnold.x == nil) then
@@ -72,7 +60,7 @@ local function canArnieKillSomeone()
   if ( hits ) then
 
     if (hits[1].object.myName == "player") then
-      fire(arnold)
+      utils.fire(arnold)
     end
   end
 end
@@ -94,7 +82,7 @@ local function arnoldMover(index)
   elseif(arnoldMovements[index].action == "shoot") then
       for i=1,arnoldMovements[index].actionData do
 
-        fire(arnold)
+        utils.fire(arnold)
       end
       print("Arnold movement, type  shoot. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
@@ -162,10 +150,17 @@ local function onKeyEvent( event )
 
     if event.keyName == "space" then
 		if event.phase == "down" then
-			fire(crate)
+			utils.fire(crate)
 		end
 	end
 
+  if event.keyName == "e" then
+		if event.phase == "down" then
+			if playerInContactWith then
+				display.remove(playerInContactWith)
+			end
+		end
+	end
     -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
     -- This lets the operating system execute its default handling of the key
     return false
@@ -250,12 +245,12 @@ local function createPlatform (positionX, positionY, width)
 local physics = require "physics"
 
 local function updateTime( event )
-    arnieCountdownTime = arnieCountdownTime - 1   
+    arnieCountdownTime = arnieCountdownTime - 1
     countDownSecondsText.text = arnieCountdownTime
-    
+
     if(arnieCountdownTime == 0) then
         --sendArnie()
-    end      
+    end
 end
 
 --------------------------------------------
@@ -274,7 +269,7 @@ function scene:create( event )
 	physics.start()
 	physics.setGravity(0, 20)
 	physics.pause()
-    physics.setDrawMode("hybrid") -- shows the physics box around the object
+  physics.setDrawMode("hybrid") -- shows the physics box around the object
 
 	-- create a grey rectangle as the backdrop
 	-- the physical screen will likely be a different shape than our defined content area
@@ -284,6 +279,26 @@ function scene:create( event )
 	background.anchorX = 0
 	background.anchorY = 0
 	background:setFillColor( .5 )
+
+    lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+	lever.anchorX = 0
+	lever.anchorY = 1
+	lever.x, lever.y = 0, 225
+    lever.myName = "paka"
+	physics.addBody( lever, "static", { isSensor=true } )
+
+    winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
+    winch.anchorX = 0
+    winch.anchorY = 1
+    winch.x, winch.y = 750, 880
+    physics.addBody( winch, "static", { isSensor=true } )
+    winch.myName = "navijak"
+
+  explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
+  explodingThing.x, explodingThing.y = 1500, 950
+  physics.addBody(explodingThing, "static", { isSensor=true })
+  explodingThing.myName = "explodingThing"
+
 
   crate = display.newSprite(playerSheet1, playerSequenceData)
   crate.x, crate.y = 1900, 950
@@ -295,7 +310,7 @@ function scene:create( event )
   entrancePortal.alpha = 0
 
   exit = display.newImageRect("Images/Things/exit.png", 150, 150)
-  exit.x, exit.y = 1845, 822
+  exit.x, exit.y = 1845, 762
   physics.addBody(exit, "static", { isSensor=true })
 	exit.myName = "exit"
 
@@ -304,31 +319,6 @@ function scene:create( event )
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
   arnold.alpha = 0
   arnold.myName = "arnold"
-  
-  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
-	lever.anchorX = 0
-	lever.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	lever.x, lever.y = 0, 225
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( lever, "static", { friction=0.3 } )
-  
-  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-	winch.anchorX = 0
-	winch.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	winch.x, winch.y = 750, 880
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( winch, "static", { friction=0.3 } )
-
-    --explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
-	--explodingThing.x, explodingThing.y = 500, 950
-	--physics.addBody(explodingThing, "static", { isSensor=true })
-	--explodingThing.myName = "explodingThing"
 
 	-- add physics to the crate
   local scaleX,scaleY = 0.5,0.5
@@ -360,21 +350,21 @@ function scene:create( event )
 	physics.addBody( grass, "static", { friction=0.3 } )
 
 
-  local ground1 = display.newImageRect( "Images/Scene/ground.png", 1200, 41)
-	ground1.anchorX = 0
-	ground1.anchorY = 1
+  --local ground1 = display.newImageRect( "Images/Scene/ground.png", 1200, 41)
+	--ground1.anchorX = 0
+	--ground1.anchorY = 1
 
-	ground1.x, ground1.y = display.screenOriginX, 938
+	--ground1.x, ground1.y = display.screenOriginX, 938
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( ground1, "static", { friction=0.3 } )
+	--local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	--physics.addBody( ground1, "static", { friction=0.3 } )
 
   local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
 	ground2.anchorX = 0
 	ground2.anchorY = 1
 
-	ground2.x, ground2.y = 1385, 938
+	ground2.x, ground2.y = 1385, 880
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
@@ -382,12 +372,12 @@ function scene:create( event )
 
 
   local platforms = {
-      createPlatform (300, 712, 400),
-      createPlatform (1200, 712, 400),
-      createPlatform (700, 496, 400),
-      createPlatform (0, 280, 200),
-      createPlatform (400, 280, 300),
-      createPlatform (1520, 280, 400),
+      createPlatform (300, 639, 400),
+      createPlatform (1200, 639, 400),
+      createPlatform (700, 439, 400),
+      createPlatform (0, 239, 200),
+      createPlatform (400, 239, 300),
+      createPlatform (1520, 239, 400),
     }
 
 	-- all display objects must be inserted into group
@@ -397,11 +387,10 @@ function scene:create( event )
 	sceneGroup:insert( grass)
 	sceneGroup:insert( crate )
 	--sceneGroup:insert( explodingThing )
-  
+
   countDownText = display.newText(sceneGroup, "Arnie comes in: ", 0,0, "MadeinChina", 56)
           countDownText.x = display.contentWidth*0.5
           countDownText.y = 50
-          
     countDownSecondsText = display.newText(sceneGroup,arnieCountdownTime , 0,0, "MadeinChina", 56)
           countDownSecondsText.x = countDownText.x + countDownText.width/2 + 25
           countDownSecondsText.y = 50
