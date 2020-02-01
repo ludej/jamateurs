@@ -498,7 +498,7 @@ function scene:create( event )
 	physics.setGravity(0, 20)
 	--physics.pause()
 
-  --physics.setDrawMode("hybrid") -- shows the physics box around the object
+  physics.setDrawMode("hybrid") -- shows the physics box around the object
 
 
 
@@ -583,31 +583,6 @@ function scene:create( event )
 	physics.addBody( grass, "static", { friction=0.3 } )
 
 
-
-  --local ground1 = display.newImageRect( "Images/Scene/ground.png", 1200, 41)
-	--ground1.anchorX = 0
-	--ground1.anchorY = 1
-
-	--ground1.x, ground1.y = display.screenOriginX, 938
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	--local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	--physics.addBody( ground1, "static", { friction=0.3 } )
-
-  --local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
-	--ground2.anchorX = 0
-	--ground2.anchorY = 1
-
-	--ground2.x, ground2.y = 1385, 880
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	--local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	--physics.addBody( ground2, "static", { friction=0.3 } )
-
-
-
-
-
     --sendArnie()
 
 	-- all display objects must be inserted into group
@@ -652,7 +627,8 @@ function sendArnie()
    end
 
    arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
-  --arnold:scale(0.5,0.5)
+  --arnold:scale(0.5,0.5) 
+  nw, nh = arnold.width*scaleX*0.85, arnold.height*scaleY*0.8
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
   arnold.alpha = 0
   arnold.myName = "arnold"
