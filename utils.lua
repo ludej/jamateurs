@@ -31,7 +31,7 @@ local function fire(shooter)
     bullet.y = shooter.y
     --bullet:setSequence("fly")
     --bullet:play()
-    transition.to(bullet, {x=2000, time=5000, onComplete = function() display.remove(bullet) end})
+    transition.to(bullet, {x=5000, time=2000, onComplete = function() display.remove(bullet) end})
     audio.play(utils.sounds["shooting"][math.random(1, #utils.sounds["shooting"])])
 end
 utils.fire = fire
