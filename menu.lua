@@ -37,7 +37,7 @@ end
 -- 'onRelease' event listener for playBtn
 local function onPlayBtnRelease()
 	timer.cancel( backgroundTimer )
-	composer.gotoScene( "level4", "fade", 500 )
+	composer.gotoScene( "level4")
 	return true	-- indicates successful touch
 end
 
@@ -45,16 +45,24 @@ function scene:create( event )
 	local sceneGroup = self.view
 	backgroundTimer = timer.performWithDelay( 80, loadBackground, 0 )
 
-	playBtn = widget.newButton{
-		label="Play Now",
-		labelColor = { default={255}, over={128} },
-		default="button.png",
-		over="button-over.png",
-		width=154, height=40,
-		onRelease = onPlayBtnRelease	-- event listener function
-	}
-	playBtn.x = display.contentCenterX
-	playBtn.y = display.contentHeight - 125
+	-- playBtn = display.newImageRect( "Images/Scene/menu/play_button/play_btn_01.png", 300, 300 )
+	playBtn = widget.newButton(
+    {
+        width = 2500,
+        height = 1250,
+        defaultFile = "Images/Scene/menu/play_button/play_btn_01.png",
+        overFile = "Images/Scene/menu/play_button/play_btn_03.png",
+        onRelease = onPlayBtnRelease})
+	-- playBtn = widget.newButton{
+	-- 	label="Play Now",
+	-- 	labelColor = { default={255}, over={128} },
+	-- 	default="button.png",
+	-- 	over="button-over.png",
+	-- 	width=154, height=40,
+	-- 	onRelease = onPlayBtnRelease	-- event listener function
+	-- }
+	playBtn.x = display.contentCenterX + 100
+	playBtn.y = display.contentHeight - 500
 
 	-- all display objects must be inserted into group
 	-- sceneGroup:insert( background )
