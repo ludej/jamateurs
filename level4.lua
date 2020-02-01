@@ -18,7 +18,7 @@ local gameLoopTimer
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local crate, entrancePortal, exit, explodingThing, lever, winch
+local crate, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
 
@@ -116,12 +116,24 @@ local function sensorCollide( self, event )
 end
 
 
+local function toggleExit()
+    if exitIsOpen then
+        exitIsOpen = false
+    else
+        exitIsOpen = true
+    end
+end
+
+
 local function objectCollide(self, event)
     if ( event.phase == "began" ) then
         if event.other.myName == "player" then
             playerInContactWith = self
         elseif event.other.myName == "arnold" then
             arnoldInContactWith = self
+            if self.myName == "switch" then
+                toggleExit()
+            end
         end
     elseif ( event.phase == "ended" ) then
         if event.other.myName == "player" then
@@ -165,8 +177,8 @@ local function onKeyEvent( event )
 
     if event.keyName == "e" then
 		if event.phase == "down" then
-			if playerInContactWith then
-				display.remove(playerInContactWith)
+			if playerInContactWith.myName == "lever" then
+				toggleExit()
                 audio.play(utils.sounds["explosion"])
 			end
 		end
@@ -216,10 +228,12 @@ local function onCollision( event )
         if ((obj1.myName == "arnold" and obj2.myName == "exit") or
 			(obj1.myName == "exit" and obj2.myName == "arnold")) then
             -- timer.cancel( gameLoopTimer )
-            transition.to(arnold, {x=exit.x})
-            transition.to(
-                arnold, {time=1000, alpha=0, width=10, height=10,
-                onComplete=function() display.remove(arnold) end} )
+            if exitIsOpen then
+                transition.to(arnold, {x=exit.x})
+                transition.to(
+                    arnold, {time=1000, alpha=0, width=10, height=10,
+                    onComplete=function() display.remove(arnold) end} )
+            end
         end
         if (obj1.myName == "bullet" or obj2.myName == "bullet") then
             local bullet, target
@@ -298,23 +312,24 @@ function scene:create( event )
 	background.anchorY = 0
 	background:setFillColor( .5 )
 
-  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
-  lever.anchorX = 0
-  lever.anchorY = 1
-  lever.x, lever.y = 0, 225
-  lever.myName = "paka"
-  physics.addBody( lever, "static", { isSensor=true } )
-  lever.collision = objectCollide
-  lever:addEventListener( "collision" )
 
-  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-  winch.anchorX = 0
-  winch.anchorY = 1
-  winch.x, winch.y = 750, 880
-  physics.addBody( winch, "static", { isSensor=true } )
-  winch.myName = "navijak"
-  winch.collision = objectCollide
-  winch:addEventListener( "collision" )
+    lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+	lever.anchorX = 0
+	lever.anchorY = 1
+	lever.x, lever.y = 0, 225
+    lever.myName = "lever"
+	physics.addBody( lever, "static", { isSensor=true } )
+    lever.collision = objectCollide
+    lever:addEventListener( "collision" )
+
+    winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
+    winch.anchorX = 0
+    winch.anchorY = 1
+    winch.x, winch.y = 750, 880
+    physics.addBody( winch, "static", { isSensor=true } )
+    winch.myName = "winch"
+    winch.collision = objectCollide
+    winch:addEventListener( "collision" )
 
 
   crate = display.newSprite(playerSheet1, playerSequenceData)
@@ -425,9 +440,9 @@ end
 function sendArnie()
 
    if(arnold ~= nil) then
-    display.remove(arnold)   
+    display.remove(arnold)
    end
-   
+
    arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
   --arnold:scale(0.5,0.5)
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
@@ -451,9 +466,10 @@ function scene:show( event )
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
     leftPressed = false
-		rightPressed = false
-		Runtime:addEventListener( "key", onKeyEvent )
-		gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
+	rightPressed = false
+    exitIsOpen = false
+	Runtime:addEventListener( "key", onKeyEvent )
+	gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
     arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
 
