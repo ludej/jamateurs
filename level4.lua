@@ -21,7 +21,7 @@ local gameOver = false
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local crate, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
 local platforms = {}
@@ -191,13 +191,13 @@ local function onKeyEvent( event )
 	end
 
 	if ((event.keyName == "up") and (event.phase == "down")) then
-        if crate.sensorOverlaps > 0 then
-            -- crate:applyLinearImpulse( 0, -0.75, crate.x, crate.y )
+        if player.sensorOverlaps > 0 then
+            -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
             canDoubleJump = true
-            crate:setLinearVelocity(0, -500)
+            player:setLinearVelocity(0, -500)
         elseif canDoubleJump then
             canDoubleJump = false
-            crate:setLinearVelocity(0, -500)
+            player:setLinearVelocity(0, -500)
         end
 	end
 
@@ -214,7 +214,7 @@ local function onKeyEvent( event )
 
     if event.keyName == "space" then
 		if event.phase == "down" then
-			utils.fire(crate)
+			utils.fire(player)
 		end
 	end
     -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
@@ -225,19 +225,19 @@ end
 
 local function gameLoop()
     if leftPressed then
-        crate.xScale = -1
-        crate.x = crate.x - 10
+        player.xScale = -1
+        player.x = player.x - 10
 	end
 	if rightPressed then
-		crate.x = crate.x + 10
-        crate.xScale = 1
+		player.x = player.x + 10
+        player.xScale = 1
 	end
 
     if(leftPressed or rightPressed) then
-        if(crate.isPlaying == false) then
-            crate:play()
+        if(player.isPlaying == false) then
+            player:play()
         else
-            crate:pause()
+            player:pause()
         end
     end    
 end
@@ -292,6 +292,9 @@ function leaveGame()
        display.remove(enemies[i])
     end          
   end
+  
+  display.remove(player)
+  display.remove(arnold)
   
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
@@ -490,10 +493,10 @@ function scene:create( event )
     winch:addEventListener( "collision" )
 
 
-  crate = display.newSprite(playerSheet1, playerSequenceData)
-  crate.x, crate.y = 1900, 950
-  crate.myName = "player"
-  crate:setSequence("running")
+  player = display.newSprite(playerSheet1, playerSequenceData)
+  player.x, player.y = 1900, 950
+  player.myName = "player"
+  player:setSequence("running")
 
   entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 300)
   entrancePortal.x, entrancePortal.y = 160, 781
@@ -501,19 +504,19 @@ function scene:create( event )
 
   createExit("Images/Things/gate-closed.png")
 
-	-- add physics to the crate
-  --crate:scale(scaleX,scaleY)
+	-- add physics to the player
+  --player:scale(scaleX,scaleY)
 
-  nw, nh = crate.width*scaleX*1, crate.height*scaleY*0.8
+  nw, nh = player.width*scaleX*1, player.height*scaleY*0.8
 	physics.addBody(
-        crate, "dynamic",
+        player, "dynamic",
         { density=1.0, friction=0.3, bounce=0, shape={-75,-50 , 75,-50 , 75,85 , -75,85} },
         { box={ halfWidth=30, halfHeight=10, x=0, y=95 }, isSensor=true  }
         )
-    crate.isFixedRotation = true
-    crate.sensorOverlaps = 0
-    crate.collision = sensorCollide
-    crate:addEventListener( "collision" )
+    player.isFixedRotation = true
+    player.sensorOverlaps = 0
+    player.collision = sensorCollide
+    player:addEventListener( "collision" )
 
 
 
@@ -569,7 +572,7 @@ function scene:create( event )
     sceneGroup:insert( entrancePortal )
     sceneGroup:insert( exit )
 	sceneGroup:insert( grass)
-	sceneGroup:insert( crate )
+	sceneGroup:insert( player )
 	--sceneGroup:insert( explodingThing )
 
   countDownText = display.newText(sceneGroup, "Arnie comes in: ", 0,0, "MadeinChina", 56)
