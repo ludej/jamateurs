@@ -21,6 +21,11 @@ local shootingSounds = {
     audio.loadSound("sound/shoot_01.wav"),
     audio.loadSound("sound/shoot_02.wav"),
     audio.loadSound("sound/shoot_03.wav")}
+  
+local jumpSound = audio.loadSound( "sound/jump.wav" )
+
+local hastaLaVistaSound = audio.loadSound( "sound/hastaLaVista.wav" )
+
 
 -- Character movement animation
 local playerSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
@@ -41,26 +46,12 @@ local arnoldSequenceData = {
   }
 
 local arnoldMovements = {
-    {moveType = "move", delta = -300},
-    {moveType = "move", delta = 550},
-    {moveType = "shoot", delta = 1},
-    {moveType = "jump", delta = -500},        
-    {moveType = "shoot", delta = 5},
-    {moveType = "move", delta = 350},
-    {moveType = "jump", delta = -500},
-    {moveType = "move", delta = -350},
-    {moveType = "move", delta = -300},
-    {moveType = "shoot", delta = 5},
-    {moveType = "move", delta = 550},
-    {moveType = "move", delta = 350},
-    {moveType = "shoot", delta = 5},
-    {moveType = "jump", delta = -500},
-    {moveType = "move", delta = -350},
-    {moveType = "move", delta = -300},
-    {moveType = "shoot", delta = 5},
-    {moveType = "move", delta = 550},
-    {moveType = "jump", delta = -500},
-    {moveType = "move", delta = -300},
+    {action = "sound", actionData = hastaLaVistaSound},
+    {action = "move", actionData = 300},
+    {action = "jump", actionData = -600},    
+    {action = "move", actionData = 550},
+    {action = "shoot", actionData = 1},
+    {action = "move", actionData = 550},    
   }
   
   -- Shoot a gun
@@ -80,23 +71,27 @@ local function arnoldMover(index)
     return
   end
   
-  if(arnoldMovements[index].moveType == "move") then
-    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].delta, onComplete = function() arnoldMover(index+1) end })
+  if(arnoldMovements[index].action == "move") then
+    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].actionData, onComplete = function() arnoldMover(index+1) end })
     --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
-    print("Arnold movement, type  move. Delta : ", arnoldMovements[index].delta)
-  elseif(arnoldMovements[index].moveType == "jump") then 
-      arnold:setLinearVelocity( 0, arnoldMovements[index].delta )
-      print("Arnold movement, type  jump. Delta : ", arnoldMovements[index].delta)
+    print("Arnold movement, type  move. Delta : ", arnoldMovements[index].actionData)
+  elseif(arnoldMovements[index].action == "jump") then 
+      audio.play( jumpSound )
+      arnold:setLinearVelocity( 0, arnoldMovements[index].actionData )
+      print("Arnold movement, type  jump. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
-    elseif(arnoldMovements[index].moveType == "shoot") then 
-      for i=1,arnoldMovements[index].delta do
+  elseif(arnoldMovements[index].action == "shoot") then 
+      for i=1,arnoldMovements[index].actionData do
         
         fire(arnold)
-      end 
-      
-      print("Arnold movement, type  shoot. Delta : ", arnoldMovements[index].delta)
+      end       
+      print("Arnold movement, type  shoot. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
-  end 
+    elseif(arnoldMovements[index].action == "sound") then 
+      print("Arnold movement, type  sound. actionData : ", arnoldMovements[index].actionData)
+      audio.play(arnoldMovements[index].actionData)
+      arnoldMover(index+1)
+    end 
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
 end
