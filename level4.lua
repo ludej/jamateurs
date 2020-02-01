@@ -37,8 +37,8 @@ local playerSequenceData = {
   }
 
 -- Arnold movement animation
-local arnoldSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1380, sheetContentHeight= 210 }
-local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieIdle.png", arnoldSheetData)
+local arnoldSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1260, sheetContentHeight= 210 }
+local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", arnoldSheetData)
 
 
 local arnoldSequenceData = {
@@ -298,23 +298,23 @@ function scene:create( event )
 	background.anchorY = 0
 	background:setFillColor( .5 )
 
-    lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
-	lever.anchorX = 0
-	lever.anchorY = 1
-	lever.x, lever.y = 0, 225
-    lever.myName = "paka"
-	physics.addBody( lever, "static", { isSensor=true } )
-    lever.collision = objectCollide
-    lever:addEventListener( "collision" )
+  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+  lever.anchorX = 0
+  lever.anchorY = 1
+  lever.x, lever.y = 0, 225
+  lever.myName = "paka"
+  physics.addBody( lever, "static", { isSensor=true } )
+  lever.collision = objectCollide
+  lever:addEventListener( "collision" )
 
-    winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-    winch.anchorX = 0
-    winch.anchorY = 1
-    winch.x, winch.y = 750, 880
-    physics.addBody( winch, "static", { isSensor=true } )
-    winch.myName = "navijak"
-    winch.collision = objectCollide
-    winch:addEventListener( "collision" )
+  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
+  winch.anchorX = 0
+  winch.anchorY = 1
+  winch.x, winch.y = 750, 880
+  physics.addBody( winch, "static", { isSensor=true } )
+  winch.myName = "navijak"
+  winch.collision = objectCollide
+  winch:addEventListener( "collision" )
 
 
   crate = display.newSprite(playerSheet1, playerSequenceData)
