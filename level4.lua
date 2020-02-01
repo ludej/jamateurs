@@ -10,7 +10,7 @@ local utils = require("utils")
 local scene = composer.newScene()
 local sceneGroup
 
-local arnold,player
+local arnold, player
 local arnieDefaultCountdownTime = 8
 local arnieCountdownTime
 local countDownTimer
@@ -21,7 +21,7 @@ local gameOver = false
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
+local entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
 local platforms = {}
@@ -362,12 +362,6 @@ local function onKeyEvent( event )
             end
 		end
 	end
-
-    if event.keyName == "space" then
-		if event.phase == "down" then
-			utils.fire(player)
-		end
-	end
     -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
     -- This lets the operating system execute its default handling of the key
     return false
@@ -641,7 +635,7 @@ function scene:show( event )
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
 	gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
-  shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
+    shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
 
