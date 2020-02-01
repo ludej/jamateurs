@@ -49,6 +49,6 @@ local function fireAtPlayer(shooter, player)
     transition.to(bullet, {x=player.x,y=player.y, time=1000, onComplete = function() display.remove(bullet) end})
     audio.play(utils.sounds["shooting"][math.random(1, #utils.sounds["shooting"])])
 end
-utils.fire = fire
+utils.fireAtPlayer = fireAtPlayer
 
 return utils
