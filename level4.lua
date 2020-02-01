@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------------------
 --
--- level3.lua
+-- level4.lua
 --
 -----------------------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ local shootingSounds = {
     audio.loadSound("sound/shoot_01.wav"),
     audio.loadSound("sound/shoot_02.wav"),
     audio.loadSound("sound/shoot_03.wav")}
-  
+
 local jumpSound = audio.loadSound( "sound/jump.wav" )
 
 local hastaLaVistaSound = audio.loadSound( "sound/hastaLaVista.wav" )
@@ -49,35 +49,35 @@ local arnoldSequenceData = {
 local arnoldMovements = {
     {action = "sound", actionData = hastaLaVistaSound},
     {action = "move", actionData = 100},
-    {action = "jump", actionData = -600},    
+    {action = "jump", actionData = -600},
     {action = "move", actionData = 550},
     {action = "shoot", actionData = 1},
-    {action = "move", actionData = 350},    
-  } 
-  
+    {action = "move", actionData = 350},
+  }
+
   -- Shoot a gun
-local function fire(shooter)
-    local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
-    physics.addBody(bullet, "static", {isSensor=true})
-    bullet.isBullet = true
-    bullet.myName = "bullet"
-    bullet.x = shooter.x
-    bullet.y = shooter.y
-    transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
-    audio.play(shootingSounds[math.random(1, #shootingSounds)])
-end
+  local function fire(shooter)
+      local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
+      physics.addBody(bullet, "dynamic", {isSensor=true})
+      bullet.isBullet = true
+      bullet.myName = "bullet"
+      bullet.x = shooter.x + 100
+      bullet.y = shooter.y
+      transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
+      audio.play(shootingSounds[math.random(1, #shootingSounds)])
+  end
 
 local function canArnieKillSomeone()
    --print( "Checking hits" )
   if(arnold.x == nil) then
     return
   end
-  
+
   local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + 1000, arnold.y, "closest" )
   if ( hits ) then
- 
-    if (hits[1].object.myName == "player") then   
-      fire(arnold) 
+
+    if (hits[1].object.myName == "player") then
+      fire(arnold)
     end
   end
 end
@@ -86,28 +86,28 @@ local function arnoldMover(index)
   if(index > #arnoldMovements) then
     return
   end
-  
+
   if(arnoldMovements[index].action == "move") then
     transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].actionData, onComplete = function() arnoldMover(index+1) end })
     --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
     print("Arnold movement, type  move. Delta : ", arnoldMovements[index].actionData)
-  elseif(arnoldMovements[index].action == "jump") then 
+  elseif(arnoldMovements[index].action == "jump") then
       audio.play( jumpSound )
       arnold:setLinearVelocity( 0, arnoldMovements[index].actionData )
       print("Arnold movement, type  jump. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
-  elseif(arnoldMovements[index].action == "shoot") then 
+  elseif(arnoldMovements[index].action == "shoot") then
       for i=1,arnoldMovements[index].actionData do
-        
+
         fire(arnold)
-      end       
+      end
       print("Arnold movement, type  shoot. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
-    elseif(arnoldMovements[index].action == "sound") then 
+    elseif(arnoldMovements[index].action == "sound") then
       print("Arnold movement, type  sound. actionData : ", arnoldMovements[index].actionData)
       audio.play(arnoldMovements[index].actionData)
       arnoldMover(index+1)
-    end 
+    end
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
 end
@@ -125,18 +125,6 @@ local function sensorCollide( self, event )
     end
 end
 
-
--- Shoot a gun
-local function fire(shooter)
-    local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
-    physics.addBody(bullet, "static", {isSensor=true})
-    bullet.isBullet = true
-    bullet.myName = "bullet"
-    bullet.x = shooter.x
-    bullet.y = shooter.y
-    transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
-    audio.play(shootingSounds[math.random(1, #shootingSounds)])
-end
 
 -- Called when a key event has been received
 local function onKeyEvent( event )
@@ -227,6 +215,21 @@ local function onCollision( event )
                 arnold, {time=1000, alpha=0, width=10, height=10,
                 onComplete=function() display.remove(arnold) end} )
         end
+        if (obj1.myName == "bullet" or obj2.myName == "bullet") then
+            local bullet, target
+            if obj1.myName == "bullet" then
+                bullet, target = obj1, obj2
+            else
+                bullet, target = obj2, obj1
+            end
+            if target.myName ~= "arnold" then
+                display.remove(bullet)
+                if target.myName == "player" then
+                    timer.cancel( gameLoopTimer )
+                    display.remove(target)
+                end
+            end
+        end
 	elseif ( event.phase == "ended" ) then
 		local obj1 = event.object1
         local obj2 = event.object2
@@ -316,8 +319,8 @@ function scene:create( event )
     crate.sensorOverlaps = 0
     crate.collision = sensorCollide
     crate:addEventListener( "collision" )
-    
-    
+
+
     physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
     arnold.isFixedRotation = true
 
@@ -331,29 +334,29 @@ function scene:create( event )
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( grass, "static", { friction=0.3 } )
-  
-  
+
+
   local ground1 = display.newImageRect( "Images/Scene/ground.png", 1200, 41)
 	ground1.anchorX = 0
 	ground1.anchorY = 1
-	
+
 	ground1.x, ground1.y = display.screenOriginX, 938
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( ground1, "static", { friction=0.3 } )
-  
+
   local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
 	ground2.anchorX = 0
 	ground2.anchorY = 1
-	
+
 	ground2.x, ground2.y = 1385, 938
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( ground2, "static", { friction=0.3 } )
-  
-  
+
+
   local platforms = {
       createPlatform (300, 712, 400),
       createPlatform (1200, 712, 400),

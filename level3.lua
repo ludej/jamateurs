@@ -56,18 +56,6 @@ local arnoldMovements = {
     {action = "move", actionData = 550},
   }
 
-  -- Shoot a gun
-local function fire(shooter)
-    local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
-    physics.addBody(bullet, "static", {isSensor=true})
-    bullet.isBullet = true
-    bullet.myName = "bullet"
-    bullet.x = shooter.x
-    bullet.y = shooter.y
-    transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
-    audio.play(shootingSounds[math.random(1, #shootingSounds)])
-end
-
 local function arnoldMover(index)
   if(index > #arnoldMovements) then
     return
@@ -235,13 +223,12 @@ local function onCollision( event )
             else
                 bullet, target = obj2, obj1
             end
-            print("bullet hit detected")
             if target.myName ~= "arnold" then
                 display.remove(bullet)
                 if target.myName == "player" then
                     timer.cancel( gameLoopTimer )
+                    display.remove(target)
                 end
-                display.remove(target)
             end
         end
 	elseif ( event.phase == "ended" ) then
