@@ -244,6 +244,9 @@ function leaveGame()
 
   display.remove(player)
   display.remove(arnold)
+  display.remove(exit)
+  display.remove(lever)
+  display.remove(winch)
 
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
