@@ -16,16 +16,7 @@ local crate, entrancePortal, exit, explodingThing
 local playerInContactWith = nil
 local gameLoopTimer
 local canDoubleJump
-local explosionSound = audio.loadSound("sound/plop.wav")
-local teleportSound = audio.loadSound("sound/teleport_01.wav")
-local shootingSounds = {
-    audio.loadSound("sound/shoot_01.wav"),
-    audio.loadSound("sound/shoot_02.wav"),
-    audio.loadSound("sound/shoot_03.wav")}
-
-local jumpSound = audio.loadSound( "sound/jump.wav" )
-
-local hastaLaVistaSound = audio.loadSound( "sound/hastaLaVista.wav" )
+local utils = require("utils")
 
 
 -- Character movement animation
@@ -47,7 +38,7 @@ local arnoldSequenceData = {
   }
 
 local arnoldMovements = {
-    {action = "sound", actionData = hastaLaVistaSound},
+    {action = "sound", actionData = utils.sounds["hastaLaVista"]},
     {action = "move", actionData = 100},
     {action = "jump", actionData = -600},
     {action = "move", actionData = 550},
@@ -64,7 +55,7 @@ local arnoldMovements = {
       bullet.x = shooter.x + 100
       bullet.y = shooter.y
       transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
-      audio.play(shootingSounds[math.random(1, #shootingSounds)])
+      audio.play(utils.sounds["shooting"][math.random(1, #utils.sounds["shooting"])])
   end
 
 local function canArnieKillSomeone()
@@ -92,7 +83,7 @@ local function arnoldMover(index)
     --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
     print("Arnold movement, type  move. Delta : ", arnoldMovements[index].actionData)
   elseif(arnoldMovements[index].action == "jump") then
-      audio.play( jumpSound )
+      audio.play( utils.sounds["jump"] )
       arnold:setLinearVelocity( 0, arnoldMovements[index].actionData )
       print("Arnold movement, type  jump. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
@@ -160,7 +151,7 @@ local function onKeyEvent( event )
 		if event.phase == "down" then
 			if playerInContactWith then
 				display.remove(playerInContactWith)
-                audio.play(explosionSound)
+                audio.play(utils.sounds["explosion"])
 			end
 		end
 	end
@@ -385,7 +376,7 @@ function scene:show( event )
 	elseif phase == "did" then
         local function teleportIn()
             timer.pause(gameLoopTimer)
-            transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(teleportSound) end} )
+            transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
             transition.fadeIn(arnold, {
                 time=500, delay=800, onComplete=function()
                     timer.resume(gameLoopTimer)
