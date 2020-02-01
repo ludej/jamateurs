@@ -10,7 +10,8 @@ local utils = require("utils")
 local scene = composer.newScene()
 
 local arnold,player
-local arnieCountdownTime = 10
+local arnieDefaultCountdownTime = 8
+local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
 
@@ -21,6 +22,9 @@ local crate, entrancePortal, exit, explodingThing, lever, winch
 local playerInContactWith = nil
 local canDoubleJump
 
+
+local nw, nh
+local scaleX,scaleY = 0.5,0.5
 
 
 -- Character movement animation
@@ -43,16 +47,19 @@ local arnoldSequenceData = {
 
 local arnoldMovements = {
     {action = "sound", actionData = utils.sounds["hastaLaVista"]},
-    {action = "move", actionData = 100},
-    {action = "jump", actionData = -600},
+     {action = "jump", actionData = -600},
+    {action = "move", actionData = 200},
+    {action = "jump", actionData = -600},  
     {action = "move", actionData = 550},
     {action = "shoot", actionData = 1},
     {action = "move", actionData = 350},
+    {action = "jump", actionData = -600},  
+    {action = "move", actionData = 450},
   }
 
 local function canArnieKillSomeone()
    --print( "Checking hits" )
-  if(arnold.x == nil) then
+  if(arnold==nill or arnold.x == nil) then
     return
   end
 
@@ -249,7 +256,9 @@ local function updateTime( event )
     countDownSecondsText.text = arnieCountdownTime
 
     if(arnieCountdownTime == 0) then
-        --sendArnie()
+        sendArnie()
+        arnieCountdownTime = arnieDefaultCountdownTime
+        countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
     end
 end
 
@@ -316,11 +325,7 @@ function scene:create( event )
   physics.addBody(exit, "static", { isSensor=true })
 	exit.myName = "exit"
 
-  arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
-  --arnold:scale(0.5,0.5)
-  arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
-  arnold.alpha = 0
-  arnold.myName = "arnold"
+ 
   
 
   lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
@@ -369,10 +374,9 @@ function scene:create( event )
 	--physics.addBody(explodingThing, "static", { isSensor=true })
 	--explodingThing.myName = "explodingThing"
 
-	-- add physics to the crate
-  local scaleX,scaleY = 0.5,0.5
+	-- add physics to the crate  
   crate:scale(scaleX,scaleY)
-  local nw, nh = crate.width*scaleX*1, crate.height*scaleY*0.8
+  nw, nh = crate.width*scaleX*1, crate.height*scaleY*0.8
 	physics.addBody(
         crate, "dynamic",
         { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} },
@@ -384,8 +388,7 @@ function scene:create( event )
     crate:addEventListener( "collision" )
 
 
-    physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
-    arnold.isFixedRotation = true
+    
 
 	-- create a grass object and add physics (with custom shape)
 	local grass = display.newImageRect( "grass.png", screenW, 82)
@@ -428,6 +431,8 @@ function scene:create( event )
       createPlatform (400, 239, 300),
       createPlatform (1520, 239, 400),
     }
+    
+    --sendArnie()
 
 	-- all display objects must be inserted into group
     sceneGroup:insert( background )
@@ -440,10 +445,39 @@ function scene:create( event )
   countDownText = display.newText(sceneGroup, "Arnie comes in: ", 0,0, "MadeinChina", 56)
           countDownText.x = display.contentWidth*0.5
           countDownText.y = 50
-    countDownSecondsText = display.newText(sceneGroup,arnieCountdownTime , 0,0, "MadeinChina", 56)
+    countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "MadeinChina", 56)
           countDownSecondsText.x = countDownText.x + countDownText.width/2 + 25
           countDownSecondsText.y = 50
 end
+
+local function teleportIn()  
+  transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
+  transition.fadeIn(arnold, {
+    time=500, delay=800, onComplete=function()
+    timer.resume(gameLoopTimer)
+    arnold:setSequence("running")
+    arnold:play()
+    arnoldMover(1)
+  end} )
+  
+  transition.fadeOut(entrancePortal, { time=300, delay=1400 } )
+end
+
+function sendArnie()
+     
+   arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
+  --arnold:scale(0.5,0.5)
+  arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
+  arnold.alpha = 0
+  arnold.myName = "arnold"
+  
+  physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
+    arnold.isFixedRotation = true
+        
+  teleportIn()
+  
+end
+
 
 
 function scene:show( event )
@@ -453,26 +487,15 @@ function scene:show( event )
 	if phase == "will" then
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
-        local function teleportIn()
-            timer.pause(gameLoopTimer)
-            transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
-            transition.fadeIn(arnold, {
-                time=500, delay=800, onComplete=function()
-                    timer.resume(gameLoopTimer)
-                    arnold:setSequence("running")
-                    arnold:play()
-                    arnoldMover(1)
-                end} )
-            transition.fadeOut(entrancePortal, { time=300, delay=1400 } )
-        end
-
-        leftPressed = false
+    leftPressed = false
 		rightPressed = false
 		Runtime:addEventListener( "key", onKeyEvent )
 		gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
+    arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
-        Runtime:addEventListener( "collision", onCollision )
-        teleportIn()
+    
+    arnieCountdownTime = arnieDefaultCountdownTime
+        Runtime:addEventListener( "collision", onCollision )       
         physics.start()
 	end
 end
