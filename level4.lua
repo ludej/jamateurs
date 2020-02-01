@@ -19,7 +19,7 @@ local gameLoopTimer
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
 local crate, entrancePortal, exit, explodingThing, lever, winch
-local playerInContactWith = nil
+local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
 
 
@@ -116,6 +116,23 @@ local function sensorCollide( self, event )
 end
 
 
+local function objectCollide(self, event)
+    if ( event.phase == "began" ) then
+        if event.other.myName == "player" then
+            playerInContactWith = self
+        elseif event.other.myName == "arnold" then
+            arnoldInContactWith = self
+        end
+    elseif ( event.phase == "ended" ) then
+        if event.other.myName == "player" then
+            playerInContactWith = nil
+        elseif event.other.myName == "arnold" then
+            arnoldInContactWith = nil
+        end
+    end
+end
+
+
 -- Called when a key event has been received
 local function onKeyEvent( event )
 
@@ -158,14 +175,6 @@ local function onKeyEvent( event )
     if event.keyName == "space" then
 		if event.phase == "down" then
 			utils.fire(crate)
-		end
-	end
-  
-  if event.keyName == "e" then
-		if event.phase == "down" then
-			if playerInContactWith then
-				display.remove(playerInContactWith)
-			end
 		end
 	end
     -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
@@ -288,29 +297,26 @@ function scene:create( event )
 	background.anchorX = 0
 	background.anchorY = 0
 	background:setFillColor( .5 )
-  
-  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+
+    lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
 	lever.anchorX = 0
 	lever.anchorY = 1
-	--  draw the grass at the very bottom of the screen
 	lever.x, lever.y = 0, 225
-  lever.myName = "paka"
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+    lever.myName = "paka"
 	physics.addBody( lever, "static", { isSensor=true } )
-  
-  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-	winch.anchorX = 0
-	winch.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	winch.x, winch.y = 750, 880
-  winch.myName = "navijak"
+    lever.collision = objectCollide
+    lever:addEventListener( "collision" )
 
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( winch, "static", { isSensor=true } )
-  
+    winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
+    winch.anchorX = 0
+    winch.anchorY = 1
+    winch.x, winch.y = 750, 880
+    physics.addBody( winch, "static", { isSensor=true } )
+    winch.myName = "navijak"
+    winch.collision = objectCollide
+    winch:addEventListener( "collision" )
+
+
   crate = display.newSprite(playerSheet1, playerSequenceData)
   crate.x, crate.y = 1900, 950
   crate.myName = "player"
@@ -324,9 +330,6 @@ function scene:create( event )
   exit.x, exit.y = 1845, 762
   physics.addBody(exit, "static", { isSensor=true })
 	exit.myName = "exit"
-
- 
-  
 
   lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
 	lever.anchorX = 0
@@ -373,6 +376,7 @@ function scene:create( event )
 	--explodingThing.x, explodingThing.y = 500, 950
 	--physics.addBody(explodingThing, "static", { isSensor=true })
 	--explodingThing.myName = "explodingThing"
+
 
 	-- add physics to the crate  
   crate:scale(scaleX,scaleY)
