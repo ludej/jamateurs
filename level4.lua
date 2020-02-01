@@ -118,11 +118,21 @@ local function sensorCollide( self, event )
 end
 
 
+local function createExit(imageLocation)
+    exit = display.newImageRect(imageLocation, 150, 150)
+    exit.x, exit.y = 1845, 762
+    physics.addBody(exit, "static", { isSensor=true })
+    exit.myName = "exit"
+end
+
 local function toggleExit()
+    display.remove(exit)
     if exitIsOpen then
         exitIsOpen = false
+        createExit("Images/Things/gate-closed.png")
     else
         exitIsOpen = true
+        createExit("Images/Things/gate-open.png")
     end
 end
 
@@ -179,10 +189,12 @@ local function onKeyEvent( event )
 
     if event.keyName == "e" then
 		if event.phase == "down" then
-			if playerInContactWith.myName == "lever" then
-				toggleExit()
-                audio.play(utils.sounds["explosion"])
-			end
+            if playerInContactWith then
+    			if playerInContactWith.myName == "lever" then
+    				toggleExit()
+                    audio.play(utils.sounds["explosion"])
+    			end
+            end
 		end
 	end
 
@@ -368,11 +380,7 @@ function scene:create( event )
   entrancePortal.x, entrancePortal.y = 160, 781
   entrancePortal.alpha = 0
 
-  exit = display.newImageRect("Images/Things/exit.png", 150, 150)
-  exit.x, exit.y = 1845, 762
-  physics.addBody(exit, "static", { isSensor=true })
-  exit.myName = "exit"
-
+  createExit("Images/Things/gate-closed.png")
 
 	-- add physics to the crate
   crate:scale(scaleX,scaleY)
