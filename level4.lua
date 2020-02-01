@@ -5,18 +5,22 @@
 -----------------------------------------------------------------------------------------
 
 local composer = require( "composer" )
+local utils = require("utils")
+
 local scene = composer.newScene()
 
 local arnold,player
+local arnieCountdownTime = 10
+local countDownTimer
+local gameLoopTimer
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
 local crate, entrancePortal, exit, explodingThing, lever, winch
 local playerInContactWith = nil
-local gameLoopTimer
 local canDoubleJump
-local utils = require("utils")
+
 
 
 -- Character movement animation
@@ -245,6 +249,15 @@ local function createPlatform (positionX, positionY, width)
 -- include Corona's "physics" library
 local physics = require "physics"
 
+local function updateTime( event )
+    arnieCountdownTime = arnieCountdownTime - 1   
+    countDownSecondsText.text = arnieCountdownTime
+    
+    if(arnieCountdownTime == 0) then
+        --sendArnie()
+    end      
+end
+
 --------------------------------------------
 
 function scene:create( event )
@@ -384,6 +397,14 @@ function scene:create( event )
 	sceneGroup:insert( grass)
 	sceneGroup:insert( crate )
 	--sceneGroup:insert( explodingThing )
+  
+  countDownText = display.newText(sceneGroup, "Arnie comes in: ", 0,0, "MadeinChina", 56)
+          countDownText.x = display.contentWidth*0.5
+          countDownText.y = 50
+          
+    countDownSecondsText = display.newText(sceneGroup,arnieCountdownTime , 0,0, "MadeinChina", 56)
+          countDownSecondsText.x = countDownText.x + countDownText.width/2 + 25
+          countDownSecondsText.y = 50
 end
 
 
@@ -411,6 +432,7 @@ function scene:show( event )
 		rightPressed = false
 		Runtime:addEventListener( "key", onKeyEvent )
 		gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
+    countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
         Runtime:addEventListener( "collision", onCollision )
         teleportIn()
         physics.start()
