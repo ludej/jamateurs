@@ -237,6 +237,7 @@ function createEnemy(xPosition, yPosition, type)
      enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200) 
   end  
   enemies[enemiesCount].myName="enemy"
+  enemies[enemiesCount].enemyIndex=enemiesCount
   enemies[enemiesCount].x = xPosition
   enemies[enemiesCount].y = yPosition
   
@@ -251,6 +252,12 @@ local function enemyHit(enemy)
   local x,y = enemy.x,enemy.y
   display.remove(enemy)
   createEnemy(x,y,"deadEnemy")  
+end
+
+local function resurrectHit(enemy)
+  local x,y = enemy.x,enemy.y
+  display.remove(enemy)
+  createEnemy(x,y,"enemy")  
 end
 
 local function onCollision( event )
