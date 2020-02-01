@@ -16,6 +16,7 @@ local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
 local shootLoopTimer
+local gameOver = false
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
@@ -23,8 +24,11 @@ local leftPressed, rightPressed
 local crate, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
+local platforms = {}
+local platformCount = 0
 local enemies = {}
 local enemiesCount = 0
+local gameOverScreen, gameoverBackground
 
 
 local nw, nh
@@ -85,7 +89,7 @@ local function canArnieKillSomeone()
 end
 
 local function arnoldMover(index)
-  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill) then
+  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill or gameOver== true) then
     return
   end
 
@@ -275,6 +279,45 @@ local function resurrectHit(enemy)
   createEnemy(x,y,"enemy")  
 end
 
+function leaveGame()
+  
+  
+  for i=1,#platforms do
+          display.remove(platforms[i])
+        end 
+        
+  for i=1,#enemies do
+    if(enemies[i].isPlaying == true) then
+       enemies[i]:pause()
+       display.remove(enemies[i])
+    end          
+  end
+  
+  display.remove(gameOverScreen)
+  display.remove(gameoverBackground)
+  composer.gotoScene("menu", "slideRight")  
+end
+
+
+
+function gameOver()
+  gameOver = true
+  gameoverBackground = display.newRect( 0, 0 , display.contentWidth* 1.25, display.contentHeight * 1.25)
+      gameoverBackground.x =display.contentWidth*0.5
+      gameoverBackground.y = display.contentHeight*0.5
+      gameoverBackground:setFillColor(0)
+      gameoverBackground.alpha = 0.7
+  gameOverScreen = display.newImageRect( "Images/Scene/UI/hasta/hasta_001.png",1920, 1080)
+  gameOverScreen.x = display.contentWidth*0.5
+  gameOverScreen.y = display.contentHeight*0.5
+  
+  timer.cancel(gameLoopTimer)
+  timer.cancel(shootLoopTimer)
+  timer.cancel(countDownTimer)
+  
+  countDownTimer = timer.performWithDelay( 2000, leaveGame, 1 )
+end
+
 local function onCollision( event )
 
     if ( event.phase == "began" ) then
@@ -302,11 +345,12 @@ local function onCollision( event )
                 bullet, target = obj2, obj1
             end
             if target.myName ~= "arnold" then
-                bullet:pause()
+                --bullet:pause()
                 display.remove(bullet)
                 if target.myName == "player" then
                     timer.cancel( gameLoopTimer )
                     display.remove(target)
+                    gameOver()
                 elseif(target.myName == "enemy") then
                   enemyHit(target)
                 end
@@ -324,6 +368,7 @@ end
 
 local function createPlatform (positionX, positionY, typePlatform)
   local platform
+  platformCount = platformCount + 1
   if (typePlatform == "A") then
     
      platform = display.newImageRect("Images/Scene/background/platform_A.png", 206, 92 )
@@ -331,7 +376,7 @@ local function createPlatform (positionX, positionY, typePlatform)
      physics.addBody( platform, "static", { friction=0.3, shape ={-nwA,-nhA,nwA,-nhA,nwA,nhA,-nwA,nhA} })
      platform.anchorX = 0.5
      platform.anchorY = 0.5
-     
+          
    elseif (typePlatform == "B") then
      platform = display.newImageRect( "Images/Scene/background/platform_B.png", 350, 62)
      local nwB, nhB = platform.width*scaleX*0.9, platform.height*scaleY*0.7 
@@ -379,10 +424,10 @@ local function createPlatform (positionX, positionY, typePlatform)
      
    end
    platform.x, platform.y = positionX, positionY
-
+  platforms[platformCount]= platform
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	
+    
   end
 -- include Corona's "physics" library
 local physics = require "physics"
@@ -414,7 +459,7 @@ function scene:create( event )
 	physics.start()
 	physics.setGravity(0, 20)
 	physics.pause()
-    physics.setDrawMode("hybrid") -- shows the physics box around the object
+    --physics.setDrawMode("hybrid") -- shows the physics box around the object
 
 	-- create a grey rectangle as the backdrop
 	-- the physical screen will likely be a different shape than our defined content area
@@ -610,6 +655,9 @@ function scene:hide( event )
 	end
 
 end
+
+
+
 
 function scene:destroy( event )
 
