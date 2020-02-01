@@ -19,7 +19,7 @@ local playerInContactWith = nil
 
 -- Character movement animation
 local playerSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
-local playerSheet1 = graphics.newImageSheet("/Images/Character/characterAnm.png", playerSheetData)
+local playerSheet1 = graphics.newImageSheet("/Images/Character/heroRun.png", playerSheetData)
 
 
 local playerSequenceData = {
@@ -28,7 +28,7 @@ local playerSequenceData = {
   
 -- Arnold movement animation
 local arnoldSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
-local arnoldSheet1 = graphics.newImageSheet("/Images/Character/pirate3.png", arnoldSheetData)
+local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", arnoldSheetData)
 
 
 local arnoldSequenceData = {
