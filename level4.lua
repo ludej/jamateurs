@@ -287,7 +287,7 @@ function scene:create( event )
 	exit.myName = "exit"
 
   arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
-  arnold:scale(0.5,0.5)
+  --arnold:scale(0.5,0.5)
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
   arnold.alpha = 0
   arnold.myName = "arnold"
@@ -302,7 +302,7 @@ function scene:create( event )
 	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( lever, "static", { friction=0.3 } )
   
-  local winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
+  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
 	winch.anchorX = 0
 	winch.anchorY = 1
 	--  draw the grass at the very bottom of the screen
@@ -320,7 +320,7 @@ function scene:create( event )
 	-- add physics to the crate
   local scaleX,scaleY = 0.5,0.5
   crate:scale(scaleX,scaleY)
-  local nw, nh = crate.width*scaleX*0.5, crate.height*scaleY*0.5
+  local nw, nh = crate.width*scaleX*1, crate.height*scaleY*0.8
 	physics.addBody(
         crate, "dynamic",
         { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} },
