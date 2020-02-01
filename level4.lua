@@ -15,6 +15,7 @@ local arnieDefaultCountdownTime = 8
 local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
+local shootLoopTimer
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
@@ -234,8 +235,11 @@ local function gameLoop()
         else
             crate:pause()
         end
-    end
-    canArnieKillSomeone()
+    end    
+end
+
+local function shootLoop()
+  canArnieKillSomeone()
 end
 
 function createEnemy(xPosition, yPosition, type)
@@ -298,6 +302,7 @@ local function onCollision( event )
                 bullet, target = obj2, obj1
             end
             if target.myName ~= "arnold" then
+                bullet:pause()
                 display.remove(bullet)
                 if target.myName == "player" then
                     timer.cancel( gameLoopTimer )
@@ -579,6 +584,7 @@ function scene:show( event )
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
 	gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
+  shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
 
