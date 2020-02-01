@@ -258,16 +258,16 @@ function scene:create( event )
     crate:setSequence("running")
 
     entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 300)
-    entrancePortal.x, entrancePortal.y = 160, 920
+    entrancePortal.x, entrancePortal.y = 160, 781
     entrancePortal.alpha = 0
 
     exit = display.newImageRect("Images/Things/exit.png", 150, 150)
-    exit.x, exit.y = 1600, 950
+    exit.x, exit.y = 1845, 822
     physics.addBody(exit, "static", { isSensor=true })
 	exit.myName = "exit"
 
     arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
-	arnold.x, arnold.y = entrancePortal.x, 950
+	arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
     arnold.alpha = 0
 	arnold.myName = "arnold"
 
