@@ -74,14 +74,18 @@ function scene:show( event )
 	local sceneGroup = self.view
 	local phase = event.phase
 
-	if phase == "will" then
-		-- Called when the scene is still off screen and is about to move on screen
-	elseif phase == "did" then
-		-- Called when the scene is now on screen
-		--
-		-- INSERT code here to make the scene come alive
-		-- e.g. start timers, begin animation, play audio, etc.
-	end
+	if ( phase == "will" ) then
+        -- Code here runs when the scene is still off screen (but is about to come on screen)
+ 
+    elseif ( phase == "did" ) then
+        -- Code here runs when the scene is entirely on screen
+               
+      local prevScene = composer.getSceneName("previous")  -- restart the game if going to the menu
+      if(prevScene) then
+        composer.removeScene(prevScene)
+      end
+ 
+    end
 end
 
 function scene:hide( event )
