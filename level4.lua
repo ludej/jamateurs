@@ -15,15 +15,20 @@ local arnieDefaultCountdownTime = 8
 local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
+local shootLoopTimer
+local gameOver = false
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local crate, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
+local platforms = {}
+local platformCount = 0
 local enemies = {}
 local enemiesCount = 0
+local gameOverScreen, gameoverBackground
 
 
 local nw, nh
@@ -84,7 +89,7 @@ local function canArnieKillSomeone()
 end
 
 local function arnoldMover(index)
-  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill) then
+  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill or gameOver== true) then
     return
   end
 
@@ -186,13 +191,13 @@ local function onKeyEvent( event )
 	end
 
 	if ((event.keyName == "up") and (event.phase == "down")) then
-        if crate.sensorOverlaps > 0 then
-            -- crate:applyLinearImpulse( 0, -0.75, crate.x, crate.y )
+        if player.sensorOverlaps > 0 then
+            -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
             canDoubleJump = true
-            crate:setLinearVelocity(0, -500)
+            player:setLinearVelocity(0, -500)
         elseif canDoubleJump then
             canDoubleJump = false
-            crate:setLinearVelocity(0, -500)
+            player:setLinearVelocity(0, -500)
         end
 	end
 
@@ -209,7 +214,7 @@ local function onKeyEvent( event )
 
     if event.keyName == "space" then
 		if event.phase == "down" then
-			utils.fire(crate)
+			utils.fire(player)
 		end
 	end
     -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
@@ -220,22 +225,25 @@ end
 
 local function gameLoop()
     if leftPressed then
-        crate.xScale = -1
-        crate.x = crate.x - 10
+        player.xScale = -1
+        player.x = player.x - 10
 	end
 	if rightPressed then
-		crate.x = crate.x + 10
-        crate.xScale = 1
+		player.x = player.x + 10
+        player.xScale = 1
 	end
 
     if(leftPressed or rightPressed) then
-        if(crate.isPlaying == false) then
-            crate:play()
+        if(player.isPlaying == false) then
+            player:play()
         else
-            crate:pause()
+            player:pause()
         end
-    end
-    canArnieKillSomeone()
+    end    
+end
+
+local function shootLoop()
+  canArnieKillSomeone()
 end
 
 function createEnemy(xPosition, yPosition, type)
@@ -271,6 +279,48 @@ local function resurrectHit(enemy)
   createEnemy(x,y,"enemy")  
 end
 
+function leaveGame()
+  
+  
+  for i=1,#platforms do
+          display.remove(platforms[i])
+        end 
+        
+  for i=1,#enemies do
+    if(enemies[i].isPlaying == true) then
+       enemies[i]:pause()
+       display.remove(enemies[i])
+    end          
+  end
+  
+  display.remove(player)
+  display.remove(arnold)
+  
+  display.remove(gameOverScreen)
+  display.remove(gameoverBackground)
+  composer.gotoScene("menu", "slideRight")  
+end
+
+
+
+function gameOver()
+  gameOver = true
+  gameoverBackground = display.newRect( 0, 0 , display.contentWidth* 1.25, display.contentHeight * 1.25)
+      gameoverBackground.x =display.contentWidth*0.5
+      gameoverBackground.y = display.contentHeight*0.5
+      gameoverBackground:setFillColor(0)
+      gameoverBackground.alpha = 0.7
+  gameOverScreen = display.newImageRect( "Images/Scene/UI/hasta/hasta_001.png",1920, 1080)
+  gameOverScreen.x = display.contentWidth*0.5
+  gameOverScreen.y = display.contentHeight*0.5
+  
+  timer.cancel(gameLoopTimer)
+  timer.cancel(shootLoopTimer)
+  timer.cancel(countDownTimer)
+  
+  countDownTimer = timer.performWithDelay( 2000, leaveGame, 1 )
+end
+
 local function onCollision( event )
 
     if ( event.phase == "began" ) then
@@ -298,10 +348,12 @@ local function onCollision( event )
                 bullet, target = obj2, obj1
             end
             if target.myName ~= "arnold" then
+                --bullet:pause()
                 display.remove(bullet)
                 if target.myName == "player" then
                     timer.cancel( gameLoopTimer )
                     display.remove(target)
+                    gameOver()
                 elseif(target.myName == "enemy") then
                   enemyHit(target)
                 end
@@ -319,6 +371,7 @@ end
 
 local function createPlatform (positionX, positionY, typePlatform)
   local platform
+  platformCount = platformCount + 1
   if (typePlatform == "A") then
     
      platform = display.newImageRect("Images/Scene/background/platform_A.png", 206, 92 )
@@ -326,7 +379,7 @@ local function createPlatform (positionX, positionY, typePlatform)
      physics.addBody( platform, "static", { friction=0.3, shape ={-nwA,-nhA,nwA,-nhA,nwA,nhA,-nwA,nhA} })
      platform.anchorX = 0.5
      platform.anchorY = 0.5
-     
+          
    elseif (typePlatform == "B") then
      platform = display.newImageRect( "Images/Scene/background/platform_B.png", 350, 62)
      local nwB, nhB = platform.width*scaleX*0.9, platform.height*scaleY*0.7 
@@ -374,10 +427,10 @@ local function createPlatform (positionX, positionY, typePlatform)
      
    end
    platform.x, platform.y = positionX, positionY
-
+  platforms[platformCount]= platform
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	
+    
   end
 -- include Corona's "physics" library
 local physics = require "physics"
@@ -409,7 +462,10 @@ function scene:create( event )
 	physics.start()
 	physics.setGravity(0, 20)
 	physics.pause()
+
   --physics.setDrawMode("hybrid") -- shows the physics box around the object
+
+
 
 	-- create a grey rectangle as the backdrop
 	-- the physical screen will likely be a different shape than our defined content area
@@ -440,10 +496,10 @@ function scene:create( event )
     winch:addEventListener( "collision" )
 
 
-  crate = display.newSprite(playerSheet1, playerSequenceData)
-  crate.x, crate.y = 1900, 950
-  crate.myName = "player"
-  crate:setSequence("running")
+  player = display.newSprite(playerSheet1, playerSequenceData)
+  player.x, player.y = 1900, 950
+  player.myName = "player"
+  player:setSequence("running")
 
   entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 300)
   entrancePortal.x, entrancePortal.y = 160, 781
@@ -451,19 +507,19 @@ function scene:create( event )
 
   createExit("Images/Things/gate-closed.png")
 
-	-- add physics to the crate
-  --crate:scale(scaleX,scaleY)
+	-- add physics to the player
+  --player:scale(scaleX,scaleY)
 
-  nw, nh = crate.width*scaleX*1, crate.height*scaleY*0.8
+  nw, nh = player.width*scaleX*1, player.height*scaleY*0.8
 	physics.addBody(
-        crate, "dynamic",
+        player, "dynamic",
         { density=1.0, friction=0.3, bounce=0, shape={-75,-50 , 75,-50 , 75,85 , -75,85} },
         { box={ halfWidth=30, halfHeight=10, x=0, y=95 }, isSensor=true  }
         )
-    crate.isFixedRotation = true
-    crate.sensorOverlaps = 0
-    crate.collision = sensorCollide
-    crate:addEventListener( "collision" )
+    player.isFixedRotation = true
+    player.sensorOverlaps = 0
+    player.collision = sensorCollide
+    player:addEventListener( "collision" )
 
 
 
@@ -510,7 +566,7 @@ function scene:create( event )
     sceneGroup:insert( entrancePortal )
     sceneGroup:insert( exit )
 	sceneGroup:insert( grass)
-	sceneGroup:insert( crate )
+	sceneGroup:insert( player )
 	--sceneGroup:insert( explodingThing )
 
   countDownText = display.newText(sceneGroup, "Arnie comes in: ", 0,0, "MadeinChina", 56)
@@ -580,6 +636,7 @@ function scene:show( event )
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
 	gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
+  shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
 
@@ -607,6 +664,9 @@ function scene:hide( event )
 	end
 
 end
+
+
+
 
 function scene:destroy( event )
 
