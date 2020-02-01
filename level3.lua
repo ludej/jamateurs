@@ -22,7 +22,7 @@ local shootingSounds = {
     audio.loadSound("sound/shoot_01.wav"),
     audio.loadSound("sound/shoot_02.wav"),
     audio.loadSound("sound/shoot_03.wav")}
-  
+
 local jumpSound = audio.loadSound( "sound/jump.wav" )
 
 local hastaLaVistaSound = audio.loadSound( "sound/hastaLaVista.wav" )
@@ -49,12 +49,12 @@ local arnoldSequenceData = {
 local arnoldMovements = {
     {action = "sound", actionData = hastaLaVistaSound},
     {action = "move", actionData = 300},
-    {action = "jump", actionData = -600},    
+    {action = "jump", actionData = -600},
     {action = "move", actionData = 550},
     {action = "shoot", actionData = 1},
-    {action = "move", actionData = 550},    
+    {action = "move", actionData = 550},
   }
-  
+
   -- Shoot a gun
 local function fire(shooter)
     local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
@@ -71,35 +71,35 @@ local function arnoldMover(index)
   if(index > #arnoldMovements) then
     return
   end
-  
+
   if(arnoldMovements[index].action == "move") then
     transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].actionData, onComplete = function() arnoldMover(index+1) end })
     --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
     print("Arnold movement, type  move. Delta : ", arnoldMovements[index].actionData)
-  elseif(arnoldMovements[index].action == "jump") then 
+  elseif(arnoldMovements[index].action == "jump") then
       audio.play( jumpSound )
       arnold:setLinearVelocity( 0, arnoldMovements[index].actionData )
       print("Arnold movement, type  jump. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
-  elseif(arnoldMovements[index].action == "shoot") then 
+  elseif(arnoldMovements[index].action == "shoot") then
       for i=1,arnoldMovements[index].actionData do
-        
+
         fire(arnold)
-      end       
+      end
       print("Arnold movement, type  shoot. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
-    elseif(arnoldMovements[index].action == "sound") then 
+    elseif(arnoldMovements[index].action == "sound") then
       print("Arnold movement, type  sound. actionData : ", arnoldMovements[index].actionData)
       audio.play(arnoldMovements[index].actionData)
       arnoldMover(index+1)
-    end 
+    end
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
 end
 
 local function sensorCollide( self, event )
     -- Confirm that the colliding elements are the foot sensor and a ground object
-    if ( event.selfElement == 2 and event.other.objType == "ground" ) then
+    if ( event.selfElement == 2 ) then
         -- Foot sensor has entered (overlapped) a ground object
         if ( event.phase == "began" ) then
             self.sensorOverlaps = self.sensorOverlaps + 1
@@ -210,6 +210,13 @@ local function onCollision( event )
             transition.to(
                 arnold, {time=1000, alpha=0, width=10, height=10,
                 onComplete=function() display.remove(arnold) end} )
+        end
+        if (obj1.myName == "bullet" or obj2.myName == "bullet") then
+            if obj1.myName == "bullet" then
+                display.remove( obj1 )
+            else
+                display.remove( obj2 )
+            end
         end
 	elseif ( event.phase == "ended" ) then
 		local obj1 = event.object1
