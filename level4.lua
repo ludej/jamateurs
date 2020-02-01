@@ -31,12 +31,12 @@ local scaleX,scaleY = 0.5,0.5
 
 
 -- Character movement animation
-local playerSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
+local playerSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1260, sheetContentHeight= 210 }
 local playerSheet1 = graphics.newImageSheet("/Images/Character/heroRun.png", playerSheetData)
 
 
 local playerSequenceData = {
-    {name="running", start=1, count=8, time=575, loopCount=0}
+    {name="running", start=1, count=6, time=575, loopCount=0}
   }
 
 -- Arnold movement animation
@@ -45,7 +45,7 @@ local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", ar
 
 
 local arnoldSequenceData = {
-    {name="running", start=1, count=8, time=575, loopCount=0}
+    {name="running", start=1, count=6, time=575, loopCount=0}
   }
 
 local arnoldMovements = {
