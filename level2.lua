@@ -11,7 +11,7 @@ local scene = composer.newScene()
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed, upPressed
-local crate, explodingThing
+local crate, entrancePortal, explodingThing
 local playerInContactWith = nil
 local explosionSound = audio.loadSound("sound/plop.wav")
 local shootingSounds = {
@@ -20,6 +20,7 @@ local shootingSounds = {
     audio.loadSound("sound/shoot_03.wav")}
 
 
+-- Shoot a gun
 local function fire()
     local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
     physics.addBody(bullet, "static", {isSensor=true})
@@ -139,10 +140,14 @@ function scene:create( event )
 	background.anchorY = 0
 	background:setFillColor( .5 )
 
+    entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 150)
+    entrancePortal.x, entrancePortal.y = 160, 950
+    entrancePortal.alpha = 0
+
 	-- make a crate (off-screen), position it, and rotate slightly
-	crate = display.newImageRect( "crate.png", 90, 90 )
-	crate.x, crate.y = 160, -100
-	crate.rotation = 15
+	crate = display.newImageRect( "crate.png", 10, 90 )
+	crate.x, crate.y = 160, 950
+    crate.alpha = 0
 	crate.myName = "player"
 
 	-- add physics to the crate
@@ -166,6 +171,7 @@ function scene:create( event )
 
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )
+    sceneGroup:insert( entrancePortal )
 	sceneGroup:insert( grass)
 	sceneGroup:insert( crate )
 	sceneGroup:insert( explodingThing )
@@ -188,7 +194,10 @@ function scene:show( event )
 		Runtime:addEventListener( "key", onKeyEvent )
 		gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
 		Runtime:addEventListener( "collision", onCollision )
-		physics.start()
+        transition.to(entrancePortal, { time=300, delay=500, alpha=1} )
+        transition.to(crate, { time=500, delay=800, alpha=1, width=90} )
+        transition.to(entrancePortal, { time=300, delay=1400, alpha=0} )
+        physics.start()
 	end
 end
 
