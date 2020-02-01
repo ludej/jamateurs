@@ -253,7 +253,7 @@ function createEnemy(xPosition, yPosition, type)
   enemies[enemiesCount].y = yPosition
   
   
-  physics.addBody( enemies[enemiesCount], "dynamic", { density=1.0, friction=0.3, bounce=0 } )
+  physics.addBody( enemies[enemiesCount], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } )
   enemies[enemiesCount].isFixedRotation = true
   sceneGroup:insert( enemies[enemiesCount] )
   
