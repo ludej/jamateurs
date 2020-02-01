@@ -11,20 +11,26 @@ local arnold,player
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
-local leftPressed, rightPressed, upPressed
+local leftPressed, rightPressed
 local crate, entrancePortal, exit, explodingThing
 local playerInContactWith = nil
 local gameLoopTimer
+local canDoubleJump
 local explosionSound = audio.loadSound("sound/plop.wav")
 local teleportSound = audio.loadSound("sound/teleport_01.wav")
 local shootingSounds = {
     audio.loadSound("sound/shoot_01.wav"),
     audio.loadSound("sound/shoot_02.wav"),
     audio.loadSound("sound/shoot_03.wav")}
+  
+local jumpSound = audio.loadSound( "sound/jump.wav" )
+
+local hastaLaVistaSound = audio.loadSound( "sound/hastaLaVista.wav" )
+
 
 -- Character movement animation
 local playerSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
-local playerSheet1 = graphics.newImageSheet("/Images/Character/characterAnm.png", playerSheetData)
+local playerSheet1 = graphics.newImageSheet("/Images/Character/heroRun.png", playerSheetData)
 
 
 local playerSequenceData = {
@@ -33,7 +39,7 @@ local playerSequenceData = {
 
 -- Arnold movement animation
 local arnoldSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
-local arnoldSheet1 = graphics.newImageSheet("/Images/Character/pirate3.png", arnoldSheetData)
+local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", arnoldSheetData)
 
 
 local arnoldSequenceData = {
@@ -41,53 +47,81 @@ local arnoldSequenceData = {
   }
 
 local arnoldMovements = {
-    {moveType = "move", delta = -300},
-    {moveType = "move", delta = 550},
-    {moveType = "jump", delta = -500},
-    {moveType = "move", delta = 350},
-    {moveType = "jump", delta = -500},
-    {moveType = "move", delta = -350},
-    {moveType = "move", delta = -300},
-    {moveType = "move", delta = 550},
-    {moveType = "move", delta = 350},
-    {moveType = "jump", delta = -500},
-    {moveType = "move", delta = -350},
-    {moveType = "move", delta = -300},
-    {moveType = "move", delta = 550},
-    {moveType = "jump", delta = -500},
-    {moveType = "move", delta = -300},
+    {action = "sound", actionData = hastaLaVistaSound},
+    {action = "move", actionData = 300},
+    {action = "jump", actionData = -600},    
+    {action = "move", actionData = 550},
+    {action = "shoot", actionData = 1},
+    {action = "move", actionData = 750},    
   }
+  
+  -- Shoot a gun
+local function fire(shooter)
+    local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
+    physics.addBody(bullet, "static", {isSensor=true})
+    bullet.isBullet = true
+    bullet.myName = "bullet"
+    bullet.x = shooter.x
+    bullet.y = shooter.y
+    transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
+    audio.play(shootingSounds[math.random(1, #shootingSounds)])
+end
 
 local function arnoldMover(index)
   if(index > #arnoldMovements) then
     return
   end
-
-  if(arnoldMovements[index].moveType == "move") then
-    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].delta, onComplete = function() arnoldMover(index+1) end })
+  
+  if(arnoldMovements[index].action == "move") then
+    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[index].actionData, onComplete = function() arnoldMover(index+1) end })
     --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
-    print("Arnold movement, type  move. Delta : ", arnoldMovements[index].delta)
-  elseif(arnoldMovements[index].moveType == "jump") then
-      arnold:setLinearVelocity( 0, arnoldMovements[index].delta )
+    print("Arnold movement, type  move. Delta : ", arnoldMovements[index].actionData)
+  elseif(arnoldMovements[index].action == "jump") then 
+      audio.play( jumpSound )
+      arnold:setLinearVelocity( 0, arnoldMovements[index].actionData )
+      print("Arnold movement, type  jump. actionData : ", arnoldMovements[index].actionData)
       arnoldMover(index+1)
-  end
+  elseif(arnoldMovements[index].action == "shoot") then 
+      for i=1,arnoldMovements[index].actionData do
+        
+        fire(arnold)
+      end       
+      print("Arnold movement, type  shoot. actionData : ", arnoldMovements[index].actionData)
+      arnoldMover(index+1)
+    elseif(arnoldMovements[index].action == "sound") then 
+      print("Arnold movement, type  sound. actionData : ", arnoldMovements[index].actionData)
+      audio.play(arnoldMovements[index].actionData)
+      arnoldMover(index+1)
+    end 
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
 end
 
+local function sensorCollide( self, event )
+    -- Confirm that the colliding elements are the foot sensor and a ground object
+    if ( event.selfElement == 2) then
+        -- Foot sensor has entered (overlapped) a ground object
+        if ( event.phase == "began" ) then
+            self.sensorOverlaps = self.sensorOverlaps + 1
+        -- Foot sensor has exited a ground object
+        elseif ( event.phase == "ended" ) then
+            self.sensorOverlaps = self.sensorOverlaps - 1
+        end
+    end
+end
+
 
 -- Shoot a gun
-local function fire()
+local function fire(shooter)
     local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
     physics.addBody(bullet, "static", {isSensor=true})
     bullet.isBullet = true
     bullet.myName = "bullet"
-    bullet.x = crate.x
-    bullet.y = crate.y
+    bullet.x = shooter.x
+    bullet.y = shooter.y
     transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
     audio.play(shootingSounds[math.random(1, #shootingSounds)])
 end
-
 
 -- Called when a key event has been received
 local function onKeyEvent( event )
@@ -108,11 +142,15 @@ local function onKeyEvent( event )
 		end
 	end
 
-	if event.keyName == "up" then
-		if event.phase == "down" then
-			-- crate:applyLinearImpulse( 0, -0.75, crate.x, crate.y )
-			crate:setLinearVelocity(0, -500)
-		end
+	if ((event.keyName == "up") and (event.phase == "down")) then
+        if crate.sensorOverlaps > 0 then
+            -- crate:applyLinearImpulse( 0, -0.75, crate.x, crate.y )
+            canDoubleJump = true
+            crate:setLinearVelocity(0, -500)
+        elseif canDoubleJump then
+            canDoubleJump = false
+            crate:setLinearVelocity(0, -500)
+        end
 	end
 
     if event.keyName == "e" then
@@ -126,7 +164,7 @@ local function onKeyEvent( event )
 
     if event.keyName == "space" then
 		if event.phase == "down" then
-			fire()
+			fire(crate)
 		end
 	end
 
@@ -183,11 +221,6 @@ local function onCollision( event )
     end
 end
 
-
--- include Corona's "physics" library
-local physics = require "physics"
-
---------------------------------------------
 local function createPlatform (positionX, positionY, width)
   local platform = display.newImageRect( "Images/Scene/platform.png", width, 41)
 	platform.anchorX = 0
@@ -199,8 +232,11 @@ local function createPlatform (positionX, positionY, width)
 	local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( platform, "static", { friction=0.3 } )
   end
-  
-  
+-- include Corona's "physics" library
+local physics = require "physics"
+
+--------------------------------------------
+
 function scene:create( event )
 
 	-- Called when the scene's view does not exist.
@@ -226,34 +262,47 @@ function scene:create( event )
 	background.anchorY = 0
 	background:setFillColor( .5 )
 
-    crate = display.newSprite(playerSheet1, playerSequenceData)
-	crate.x, crate.y = 1900, 950
-	crate.myName = "player"
-    crate:setSequence("running")
+  crate = display.newSprite(playerSheet1, playerSequenceData)
+  crate.x, crate.y = 1900, 950
+  crate.myName = "player"
+  crate:setSequence("running")
 
-    entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 300)
-    entrancePortal.x, entrancePortal.y = 160, 781
-    entrancePortal.alpha = 0
+  entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 300)
+  entrancePortal.x, entrancePortal.y = 160, 781
+  entrancePortal.alpha = 0
 
-    exit = display.newImageRect("Images/Things/exit.png", 150, 150)
-    exit.x, exit.y = 1845, 822
-    physics.addBody(exit, "static", { isSensor=true })
+  exit = display.newImageRect("Images/Things/exit.png", 150, 150)
+  exit.x, exit.y = 1845, 822
+  physics.addBody(exit, "static", { isSensor=true })
 	exit.myName = "exit"
 
     arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
-	arnold.x, arnold.y = entrancePortal.x, 781
+    arnold:scale(0.5,0.5)
+    arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
     arnold.alpha = 0
-	arnold.myName = "arnold"
+    arnold.myName = "arnold"
 
-    explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
-	explodingThing.x, explodingThing.y = 500, 950
-	physics.addBody(explodingThing, "static", { isSensor=true })
-	explodingThing.myName = "explodingThing"
+    --explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
+	--explodingThing.x, explodingThing.y = 500, 950
+	--physics.addBody(explodingThing, "static", { isSensor=true })
+	--explodingThing.myName = "explodingThing"
 
 	-- add physics to the crate
-	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0 } )
+  local scaleX,scaleY = 0.5,0.5
+  crate:scale(scaleX,scaleY)
+  local nw, nh = crate.width*scaleX*0.5, crate.height*scaleY*0.5
+	physics.addBody(
+        crate, "dynamic",
+        { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} },
+        { box={ halfWidth=30, halfHeight=10, x=0, y=95 }, isSensor=true  }
+        )
     crate.isFixedRotation = true
-    physics.addBody( arnold, { density=1.0, friction=0.3, bounce=0 } )
+    crate.sensorOverlaps = 0
+    crate.collision = sensorCollide
+    crate:addEventListener( "collision" )
+    
+    
+    physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
     arnold.isFixedRotation = true
 
 	-- create a grass object and add physics (with custom shape)
@@ -278,11 +327,11 @@ function scene:create( event )
 	local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( ground1, "static", { friction=0.3 } )
   
-  local ground2 = display.newImageRect( "Images/Scene/ground.png", 620, 41)
+  local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
 	ground2.anchorX = 0
 	ground2.anchorY = 1
 	
-	ground2.x, ground2.y = 1300, 938
+	ground2.x, ground2.y = 1385, 938
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
@@ -304,7 +353,7 @@ function scene:create( event )
     sceneGroup:insert( exit )
 	sceneGroup:insert( grass)
 	sceneGroup:insert( crate )
-	sceneGroup:insert( explodingThing )
+	--sceneGroup:insert( explodingThing )
 end
 
 
