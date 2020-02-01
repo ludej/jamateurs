@@ -232,8 +232,6 @@ function scene:create( event )
 	arnold.x, arnold.y = entrancePortal.x, 950
     arnold.alpha = 0
 	arnold.myName = "arnold"
-    -- arnold:setSequence("running")
-    -- arnold:play()
 
     explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
 	explodingThing.x, explodingThing.y = 500, 950
@@ -242,7 +240,9 @@ function scene:create( event )
 
 	-- add physics to the crate
 	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0 } )
+    crate.isFixedRotation = true
     physics.addBody( arnold, { density=1.0, friction=0.3, bounce=0 } )
+    arnold.isFixedRotation = true
 
 	-- create a grass object and add physics (with custom shape)
 	local grass = display.newImageRect( "grass.png", 800, 82)
