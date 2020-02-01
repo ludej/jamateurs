@@ -371,19 +371,20 @@ function scene:create( event )
 	--local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	--physics.addBody( ground1, "static", { friction=0.3 } )
 
-  local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
-	ground2.anchorX = 0
-	ground2.anchorY = 1
+  --local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
+	--ground2.anchorX = 0
+	--ground2.anchorY = 1
 
-	ground2.x, ground2.y = 1385, 880
+	--ground2.x, ground2.y = 1385, 880
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( ground2, "static", { friction=0.3 } )
+	--local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	--physics.addBody( ground2, "static", { friction=0.3 } )
 
 
   local platforms = {
-      createPlatform (300, 639, 400),
+      createPlatform (300, 840, 400),
+      createPlatform (1385, 870, 535),
       createPlatform (1200, 639, 400),
       createPlatform (700, 439, 400),
       createPlatform (0, 239, 200),
