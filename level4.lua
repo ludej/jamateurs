@@ -49,11 +49,11 @@ local arnoldMovements = {
     {action = "sound", actionData = utils.sounds["hastaLaVista"]},
      {action = "jump", actionData = -600},
     {action = "move", actionData = 200},
-    {action = "jump", actionData = -600},  
+    {action = "jump", actionData = -600},
     {action = "move", actionData = 550},
     {action = "shoot", actionData = 1},
     {action = "move", actionData = 350},
-    {action = "jump", actionData = -600},  
+    {action = "jump", actionData = -600},
     {action = "move", actionData = 450},
   }
 
@@ -287,7 +287,7 @@ function scene:create( event )
 	physics.start()
 	physics.setGravity(0, 20)
 	physics.pause()
-  physics.setDrawMode("hybrid") -- shows the physics box around the object
+    physics.setDrawMode("hybrid") -- shows the physics box around the object
 
 	-- create a grey rectangle as the backdrop
 	-- the physical screen will likely be a different shape than our defined content area
@@ -329,56 +329,10 @@ function scene:create( event )
   exit = display.newImageRect("Images/Things/exit.png", 150, 150)
   exit.x, exit.y = 1845, 762
   physics.addBody(exit, "static", { isSensor=true })
-	exit.myName = "exit"
-
-  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
-	lever.anchorX = 0
-	lever.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	lever.x, lever.y = 0, 225
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( lever, "static", { friction=0.3 } )
-
-  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-	winch.anchorX = 0
-	winch.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	winch.x, winch.y = 750, 880
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( winch, "static", { lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)})
-	lever.anchorX = 0
-	lever.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	lever.x, lever.y = 0, 225
-  lever.myName = "paka"
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( lever, "static", { isSensor=true } )
-  
-  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-	winch.anchorX = 0
-	winch.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	winch.x, winch.y = 750, 880
-  winch.myName = "navijak"
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( winch, "static", { isSensor=true } )
+  exit.myName = "exit"
 
 
-    --explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
-	--explodingThing.x, explodingThing.y = 500, 950
-	--physics.addBody(explodingThing, "static", { isSensor=true })
-	--explodingThing.myName = "explodingThing"
-
-
-	-- add physics to the crate  
+	-- add physics to the crate
   crate:scale(scaleX,scaleY)
   nw, nh = crate.width*scaleX*1, crate.height*scaleY*0.8
 	physics.addBody(
@@ -392,7 +346,7 @@ function scene:create( event )
     crate:addEventListener( "collision" )
 
 
-    
+
 
 	-- create a grass object and add physics (with custom shape)
 	local grass = display.newImageRect( "grass.png", screenW, 82)
@@ -435,7 +389,7 @@ function scene:create( event )
       createPlatform (400, 239, 300),
       createPlatform (1520, 239, 400),
     }
-    
+
     --sendArnie()
 
 	-- all display objects must be inserted into group
@@ -454,7 +408,7 @@ function scene:create( event )
           countDownSecondsText.y = 50
 end
 
-local function teleportIn()  
+local function teleportIn()
   transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
   transition.fadeIn(arnold, {
     time=500, delay=800, onComplete=function()
@@ -463,11 +417,12 @@ local function teleportIn()
     arnold:play()
     arnoldMover(1)
   end} )
-  
+
   transition.fadeOut(entrancePortal, { time=300, delay=1400 } )
 end
 
 function sendArnie()
+
    if(arnold ~= nil) then
     display.remove(arnold)   
    end
@@ -477,12 +432,12 @@ function sendArnie()
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
   arnold.alpha = 0
   arnold.myName = "arnold"
-  
+
   physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
     arnold.isFixedRotation = true
-        
+
   teleportIn()
-  
+
 end
 
 
@@ -500,9 +455,9 @@ function scene:show( event )
 		gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
     arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
-    
+
     arnieCountdownTime = arnieDefaultCountdownTime
-        Runtime:addEventListener( "collision", onCollision )       
+        Runtime:addEventListener( "collision", onCollision )
         physics.start()
 	end
 end
