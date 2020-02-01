@@ -4,6 +4,7 @@
 --
 -----------------------------------------------------------------------------------------
 
+--require("mobdebug").start()
 local composer = require( "composer" )
 local scene = composer.newScene()
 
@@ -110,6 +111,30 @@ local function sensorCollide( self, event )
     end
 end
 
+local function canArnieKillSomeone()
+   --print( "Checking hits" )
+  if(arnold.x == nil) then
+    return
+    end
+  local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + 1000, arnold.y, "closest" )
+  if ( hits ) then
+ 
+  if (hits[1].object.myName == "player") then
+    -- There's at least one hit
+      print( "Hit count: " .. tostring( #hits ) )
+      fire(arnold)
+    -- Output the results
+      for i,v in ipairs( hits ) do
+          print( "Hit: ", i, v.object, " Position: ", v.position.x, v.position.y, " Surface normal: ", v.normal.x, v.normal.y )
+      end
+ 
+      print( "The first object hit is: ", hits[1].object, " at position: ", hits[1].position.x, hits[1].position.y, " where the surface normal is: ", hits[1].normal.x, hits[1].  normal.y, " and where the fraction along the ray is: ", hits[1].fraction )
+    else
+    -- No hits on raycast
+    end
+  end
+end
+
 
 -- Shoot a gun
 local function fire(shooter)
@@ -191,6 +216,8 @@ local function gameLoop()
             crate:pause()
         end
     end
+    
+    canArnieKillSomeone()
 end
 
 
@@ -273,7 +300,7 @@ function scene:create( event )
 
     explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
 	explodingThing.x, explodingThing.y = 500, 950
-	physics.addBody(explodingThing, "static", { isSensor=true })
+	physics.addBody(explodingThing, "static")
 	explodingThing.myName = "explodingThing"
 
 	-- add physics to the crate
