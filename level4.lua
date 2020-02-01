@@ -409,7 +409,7 @@ function scene:create( event )
 	physics.start()
 	physics.setGravity(0, 20)
 	physics.pause()
-    physics.setDrawMode("hybrid") -- shows the physics box around the object
+  --physics.setDrawMode("hybrid") -- shows the physics box around the object
 
 	-- create a grey rectangle as the backdrop
 	-- the physical screen will likely be a different shape than our defined content area
@@ -501,16 +501,7 @@ function scene:create( event )
 	--physics.addBody( ground2, "static", { friction=0.3 } )
 
 
-  local platforms = {
-      createPlatform (300, 840, "C"),
-      createPlatform (1385, 870, "B"),
-      createPlatform (1200, 639, "A"),
-      createPlatform (700, 439, "D"),
-      createPlatform (116, 239, "AP"),
-      createPlatform (400, 239, "BP"),
-      createPlatform (1520, 239, "CP"),
-      createPlatform (1500, 100, "DP"),
-    }
+  
 
     --sendArnie()
 
@@ -572,6 +563,18 @@ function scene:show( event )
 	if phase == "will" then
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
+    local platforms = {
+      createPlatform (410, 1050, "D"),
+      createPlatform (1510, 990, "DP"),
+      createPlatform (960, 794, "BP"),
+      createPlatform (1800, 794, "A"),
+      createPlatform (300, 490, "CP"),
+      createPlatform (1450, 540, "C"),
+      createPlatform (85, 210, "AP"),
+      createPlatform (1000, 300, "BP"),
+      createPlatform (1750, 270, "B"),
+          
+    }
     leftPressed = false
 	rightPressed = false
     exitIsOpen = false
