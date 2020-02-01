@@ -11,8 +11,9 @@ local physics = require ("physics")
 local scene = composer.newScene()
 local sceneGroup
 
+
 local flames
-local arnold,player
+local arnold
 
 local arnieDefaultCountdownTime = 8
 local arnieCountdownTime
@@ -46,8 +47,8 @@ local playerSheet1 = graphics.newImageSheet("/Images/Character/heroAnim.png", pl
 
 
 local playerSequenceData = {
-    {name="idle", start=1, count=4, time=575, loopCount=0},
-    {name="running", start=5, count=6, time=575, loopCount=0}
+    {name="idle", start=1, count=4, time=800, loopCount=0},
+    {name="running", start=5, count=6, time=800, loopCount=0}
   }
 
 -- Arnold movement animation
@@ -66,7 +67,13 @@ local flamesSequenceData = {
     {name="burning", start=1, count=17, time=1500, loopCount=0}
   }
 
+local entrancePortalSheetData = {width = 300, height = 300, numFrames = 12, sheetContentWidth = 3600, sheetContentHeight= 300 }
+local entrancePortalSheet1 = graphics.newImageSheet("/Images/Things/portalAnim.png", entrancePortalSheetData)
 
+local entrancePortalSequenceData = {
+    {name="beaming", start=1, count=12, time=1300, loopCount=0}
+  }
+  
   -- Enemy idle animation
 local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1470, sheetContentHeight= 210 }
 local enemyIdleSheet = graphics.newImageSheet("/Images/Character/enemyIdle.png", enemyIdleSheetData)
@@ -148,7 +155,7 @@ end
 
 local function createExit(imageLocation)
     exit = display.newImageRect(imageLocation, 150, 150)
-    exit.x, exit.y = 1845, 700
+    exit.x, exit.y = 1845, 670
     physics.addBody(exit, "static", { isSensor=true })
     exit.myName = "exit"
 end
@@ -214,38 +221,41 @@ local function shootLoop()
   canArnieKillSomeone()
 end
 
-function createEnemy(xPosition, yPosition, type)
-  enemiesCount = enemiesCount +1
-  if(type == "enemy") then
-    enemies[enemiesCount]= display.newSprite(enemyIdleSheet, enemyIdleSequenceData)
-    enemies[enemiesCount]:setSequence("idle")
-    enemies[enemiesCount]:play()
-    timer.performWithDelay(1, function() physics.addBody( enemies[enemiesCount], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } ) end, 1)
-  elseif(type == "deadEnemy") then
-     enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200)
-     timer.performWithDelay(1, function() physics.addBody( enemies[enemiesCount], "static", { isSensor = true } ) end, 1)
-     enemies[enemiesCount].collision = objectCollide
-     enemies[enemiesCount]:addEventListener( "collision" )
+function createEnemy(xPosition, yPosition, type, index)
+  if(index<0) then
+    enemiesCount = enemiesCount +1
+    index = enemiesCount
   end
-  enemies[enemiesCount].myName="enemy"
-  enemies[enemiesCount].enemyIndex=enemiesCount
-  enemies[enemiesCount].x = xPosition
-  enemies[enemiesCount].y = yPosition
-  enemies[enemiesCount].isFixedRotation = true
-  sceneGroup:insert( enemies[enemiesCount] )
+  if(type == "enemy") then
+    enemies[index]= display.newSprite(enemyIdleSheet, enemyIdleSequenceData)
+    enemies[index]:setSequence("idle")
+    enemies[index]:play()
+    timer.performWithDelay(1, function() physics.addBody( enemies[index], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } ) end, 1)
+  elseif(type == "deadEnemy") then
+     enemies[index]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200)
+     timer.performWithDelay(1, function() physics.addBody( enemies[index], "static", { isSensor = true } ) end, 1)
+     enemies[index].collision = objectCollide
+     enemies[index]:addEventListener( "collision" )
+  end
+  enemies[index].myName=type
+  enemies[index].enemyIndex=enemiesCount
+  enemies[index].x = xPosition
+  enemies[index].y = yPosition
+  enemies[index].isFixedRotation = true
+  sceneGroup:insert( enemies[index] )
 
   end
 
 local function enemyHit(enemy)
   local x,y = enemy.x,enemy.y
   display.remove(enemy)
-  createEnemy(x,y,"deadEnemy")
+  createEnemy(x,y,"deadEnemy", enemy.enemyIndex)
 end
 
 local function resurrectEnemy(enemy)
   local x,y = enemy.x,enemy.y
   display.remove(enemy)
-  createEnemy(x,y,"enemy")
+  createEnemy(x,y,"enemy", enemy.enemyIndex)
 end
 
 function leaveGame()
@@ -382,7 +392,8 @@ local function onKeyEvent( event )
     				toggleExit()
                     audio.play(utils.sounds["explosion"])
     			end
-                if playerInContactWith.myName == "enemy" then
+                if playerInContactWith.myName == "deadEnemy" then
+                    print("In contact with enemy for resurrection")
                     resurrectEnemy(playerInContactWith)
                 end
             end
@@ -526,16 +537,20 @@ function scene:create( event )
   flames.myName = "flames"
   flames:setSequence("burning")
   flames:play()
-
+  physics.addBody( flames, "static", { friction=0.3, shape ={-70,-90 , 70,-90 , 70,150 , -70,150} })
   player = display.newSprite(playerSheet1, playerSequenceData)
   player.x, player.y = 1900, 950
   player.myName = "player"
   player:setSequence("idle")
   player:play()
 
-  entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 300)
+  entrancePortal = display.newSprite(entrancePortalSheet1,entrancePortalSequenceData)
   entrancePortal.x, entrancePortal.y = 160, 781
   entrancePortal.alpha = 0
+  entrancePortal.myName = "portal"
+  entrancePortal:setSequence("beaming")
+  entrancePortal:play()
+  
 
   createExit("Images/Things/gate-closed.png")
 
@@ -660,16 +675,18 @@ function scene:show( event )
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
     local platforms = {
-      createPlatform (410, 1050, "D"),
-      createPlatform (1510, 990, "DP"),
-      createPlatform (960, 794, "BP"),
-      createPlatform (1800, 794, "A"),
-      createPlatform (300, 490, "CP"),
+      createPlatform (450, 1010, "D"),
+      createPlatform (1480, 950, "DP"),
+      createPlatform (890, 724, "BP"),
+      createPlatform (1800, 764, "A"),
+      createPlatform (300, 460, "CP"),
       createPlatform (1450, 540, "C"),
-      createPlatform (85, 210, "AP"),
-      createPlatform (1000, 300, "BP"),
-      createPlatform (1750, 270, "B"),
-  }
+      createPlatform (110, 180, "AP"),
+      createPlatform (1050, 300, "BP"),
+      createPlatform (1700, 210, "B"),
+
+    }
+
     leftPressed = false
 	rightPressed = false
     exitIsOpen = false
@@ -681,9 +698,11 @@ function scene:show( event )
 
     arnieCountdownTime = arnieDefaultCountdownTime
         Runtime:addEventListener( "collision", onCollision )
-    physics.start()
-    createEnemy(1400,1000,"enemy")
 
+    physics.start() 
+    createEnemy(1400,900,"enemy", -1)
+      
+    
 	end
 end
 
