@@ -35,19 +35,29 @@ local arnoldSequenceData = {
     {name="running", start=1, count=8, time=575, loopCount=0}
   }
   
+  local shootingSounds = {
+    audio.loadSound("sound/shoot_01.wav"),
+    audio.loadSound("sound/shoot_02.wav"),
+    audio.loadSound("sound/shoot_03.wav")}
+  
 local arnoldMovements = {
     {moveType = "move", delta = -300},
     {moveType = "move", delta = 550},
-    {moveType = "jump", delta = -500},
+    {moveType = "shoot", delta = 1},
+    {moveType = "jump", delta = -500},        
+    {moveType = "shoot", delta = 5},
     {moveType = "move", delta = 350},
     {moveType = "jump", delta = -500},
     {moveType = "move", delta = -350},
     {moveType = "move", delta = -300},
+    {moveType = "shoot", delta = 5},
     {moveType = "move", delta = 550},
     {moveType = "move", delta = 350},
+    {moveType = "shoot", delta = 5},
     {moveType = "jump", delta = -500},
     {moveType = "move", delta = -350},
     {moveType = "move", delta = -300},
+    {moveType = "shoot", delta = 5},
     {moveType = "move", delta = 550},
     {moveType = "jump", delta = -500},
     {moveType = "move", delta = -300},
@@ -93,6 +103,18 @@ local function onKeyEvent( event )
     return false
 end
 
+-- Shoot a gun
+local function fire(shooter)
+    local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
+    physics.addBody(bullet, "static", {isSensor=true})
+    bullet.isBullet = true
+    bullet.myName = "bullet"
+    bullet.x = shooter.x
+    bullet.y = shooter.y
+    transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
+    audio.play(shootingSounds[math.random(1, #shootingSounds)])
+end
+
 local function arnoldMover(index)
   if(index > #arnoldMovements) then
     return
@@ -104,6 +126,15 @@ local function arnoldMover(index)
     print("Arnold movement, type  move. Delta : ", arnoldMovements[index].delta)
   elseif(arnoldMovements[index].moveType == "jump") then 
       arnold:setLinearVelocity( 0, arnoldMovements[index].delta )
+      print("Arnold movement, type  jump. Delta : ", arnoldMovements[index].delta)
+      arnoldMover(index+1)
+    elseif(arnoldMovements[index].moveType == "shoot") then 
+      for i=1,arnoldMovements[index].delta do
+        
+        fire(arnold)
+      end 
+      
+      print("Arnold movement, type  shoot. Delta : ", arnoldMovements[index].delta)
       arnoldMover(index+1)
   end 
   --ArnoldMovement(index+1)
