@@ -11,7 +11,7 @@ local scene = composer.newScene()
 local sceneGroup
 
 local flames 
-local arnold,player
+local arnold
 
 local arnieDefaultCountdownTime = 8
 local arnieCountdownTime
@@ -64,6 +64,12 @@ local flamesSequenceData = {
     {name="burning", start=1, count=17, time=1500, loopCount=0}
   }
   
+local entrancePortalSheetData = {width = 300, height = 300, numFrames = 12, sheetContentWidth = 3600, sheetContentHeight= 300 }
+local entrancePortalSheet1 = graphics.newImageSheet("/Images/Things/portalAnim.png", entrancePortalSheetData)
+
+local entrancePortalSequenceData = {
+    {name="beaming", start=1, count=12, time=1300, loopCount=0}
+  }
 
   -- Enemy idle animation
 local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1470, sheetContentHeight= 210 }
@@ -146,7 +152,7 @@ end
 
 local function createExit(imageLocation)
     exit = display.newImageRect(imageLocation, 150, 150)
-    exit.x, exit.y = 1845, 700
+    exit.x, exit.y = 1845, 670
     physics.addBody(exit, "static", { isSensor=true })
     exit.myName = "exit"
 end
@@ -518,15 +524,19 @@ function scene:create( event )
   flames.myName = "flames"
   flames:setSequence("burning")
   flames:play()
-
+  physics.addBody( flames, "static", { friction=0.3, shape ={-70,-90 , 70,-90 , 70,150 , -70,150} })
   player = display.newSprite(playerSheet1, playerSequenceData)
   player.x, player.y = 1900, 950
   player.myName = "player"
   player:setSequence("running")
 
-  entrancePortal = display.newImageRect("Images/Things/portal.png", 150, 300)
+  entrancePortal = display.newSprite(entrancePortalSheet1,entrancePortalSequenceData)
   entrancePortal.x, entrancePortal.y = 160, 781
   entrancePortal.alpha = 0
+  entrancePortal.myName = "portal"
+  entrancePortal:setSequence("beaming")
+  entrancePortal:play()
+  
 
   createExit("Images/Things/gate-closed.png")
 
@@ -651,15 +661,15 @@ function scene:show( event )
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
     local platforms = {
-      createPlatform (410, 1050, "D"),
-      createPlatform (1510, 990, "DP"),
-      createPlatform (960, 794, "BP"),
-      createPlatform (1800, 794, "A"),
-      createPlatform (300, 490, "CP"),
+      createPlatform (450, 1010, "D"),
+      createPlatform (1480, 950, "DP"),
+      createPlatform (890, 724, "BP"),
+      createPlatform (1800, 764, "A"),
+      createPlatform (300, 460, "CP"),
       createPlatform (1450, 540, "C"),
-      createPlatform (85, 210, "AP"),
-      createPlatform (1000, 300, "BP"),
-      createPlatform (1750, 270, "B"),
+      createPlatform (110, 180, "AP"),
+      createPlatform (1050, 300, "BP"),
+      createPlatform (1700, 210, "B"),
 
     }
     leftPressed = false
@@ -674,7 +684,7 @@ function scene:show( event )
     arnieCountdownTime = arnieDefaultCountdownTime
         Runtime:addEventListener( "collision", onCollision )
     physics.start() 
-    createEnemy(1400,1000,"enemy")
+    createEnemy(1400,900,"enemy")
       
 	end
 end
