@@ -9,7 +9,7 @@ local utils = require("utils")
 
 local scene = composer.newScene()
 local sceneGroup
-
+local flames 
 local arnold,player
 local arnieDefaultCountdownTime = 8
 local arnieCountdownTime
@@ -21,7 +21,7 @@ local gameOver = false
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch, flame
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
 local platforms = {}
@@ -48,9 +48,15 @@ local playerSequenceData = {
 local arnoldSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1260, sheetContentHeight= 210 }
 local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", arnoldSheetData)
 
-
 local arnoldSequenceData = {
     {name="running", start=1, count=6, time=575, loopCount=0}
+  }
+
+local flamesSheetData = {width = 200, height = 300, numFrames = 17, sheetContentWidth = 3400, sheetContentHeight= 300 }
+local flamesSheet1 = graphics.newImageSheet("/Images/Things/flamesAnim.png", flamesSheetData)
+
+local flamesSequenceData = {
+    {name="burning", start=1, count=17, time=1500, loopCount=0}
   }
   
   -- Enemy idle animation
@@ -134,7 +140,7 @@ end
 
 local function createExit(imageLocation)
     exit = display.newImageRect(imageLocation, 150, 150)
-    exit.x, exit.y = 1845, 762
+    exit.x, exit.y = 1845, 700
     physics.addBody(exit, "static", { isSensor=true })
     exit.myName = "exit"
 end
@@ -494,7 +500,14 @@ function scene:create( event )
     winch.myName = "winch"
     winch.collision = objectCollide
     winch:addEventListener( "collision" )
-
+    
+    
+    
+  flames = display.newSprite(flamesSheet1, flamesSequenceData)
+  flames.x, flames.y = 960, 940
+  flames.myName = "flames"
+  flames:setSequence("burning")
+  flames:play()
 
   player = display.newSprite(playerSheet1, playerSequenceData)
   player.x, player.y = 1900, 950
@@ -533,31 +546,7 @@ function scene:create( event )
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( grass, "static", { friction=0.3 } )
-
-
-  --local ground1 = display.newImageRect( "Images/Scene/ground.png", 1200, 41)
-	--ground1.anchorX = 0
-	--ground1.anchorY = 1
-
-	--ground1.x, ground1.y = display.screenOriginX, 938
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	--local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	--physics.addBody( ground1, "static", { friction=0.3 } )
-
-  --local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
-	--ground2.anchorX = 0
-	--ground2.anchorY = 1
-
-	--ground2.x, ground2.y = 1385, 880
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	--local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	--physics.addBody( ground2, "static", { friction=0.3 } )
-
-
-  
+	physics.addBody( grass, "static", { friction=0.3 } )  
 
     --sendArnie()
 
@@ -643,7 +632,7 @@ function scene:show( event )
     arnieCountdownTime = arnieDefaultCountdownTime
         Runtime:addEventListener( "collision", onCollision )
     physics.start() 
-    createEnemy(1000,1100,"enemy")
+    createEnemy(1400,1000,"enemy")
       
 	end
 end
