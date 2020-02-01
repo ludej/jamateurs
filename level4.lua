@@ -46,8 +46,8 @@ local playerSheet1 = graphics.newImageSheet("/Images/Character/heroAnim.png", pl
 
 
 local playerSequenceData = {
-    {name="idle", start=1, count=4, time=575, loopCount=0},
-    {name="running", start=5, count=6, time=575, loopCount=0}
+    {name="idle", start=1, count=4, time=800, loopCount=0},
+    {name="running", start=5, count=6, time=800, loopCount=0}
   }
 
 -- Arnold movement animation
