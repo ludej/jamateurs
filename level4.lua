@@ -165,7 +165,14 @@ local function onKeyEvent( event )
 			fire(crate)
 		end
 	end
-
+  
+  if event.keyName == "e" then
+		if event.phase == "down" then
+			if playerInContactWith then
+				display.remove(playerInContactWith)
+			end
+		end
+	end
     -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
     -- This lets the operating system execute its default handling of the key
     return false
@@ -274,7 +281,7 @@ function scene:create( event )
 	physics.start()
 	physics.setGravity(0, 20)
 	physics.pause()
-    physics.setDrawMode("hybrid") -- shows the physics box around the object
+  physics.setDrawMode("hybrid") -- shows the physics box around the object
 
 	-- create a grey rectangle as the backdrop
 	-- the physical screen will likely be a different shape than our defined content area
@@ -284,7 +291,29 @@ function scene:create( event )
 	background.anchorX = 0
 	background.anchorY = 0
 	background:setFillColor( .5 )
+  
+  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+	lever.anchorX = 0
+	lever.anchorY = 1
+	--  draw the grass at the very bottom of the screen
+	lever.x, lever.y = 0, 225
+  lever.myName = "paka"
 
+	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
+	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	physics.addBody( lever, "static", { isSensor=true } )
+  
+  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
+	winch.anchorX = 0
+	winch.anchorY = 1
+	--  draw the grass at the very bottom of the screen
+	winch.x, winch.y = 750, 880
+  winch.myName = "navijak"
+
+	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
+	local winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	physics.addBody( winch, "static", { isSensor=true } )
+  
   crate = display.newSprite(playerSheet1, playerSequenceData)
   crate.x, crate.y = 1900, 950
   crate.myName = "player"
@@ -295,7 +324,7 @@ function scene:create( event )
   entrancePortal.alpha = 0
 
   exit = display.newImageRect("Images/Things/exit.png", 150, 150)
-  exit.x, exit.y = 1845, 822
+  exit.x, exit.y = 1845, 762
   physics.addBody(exit, "static", { isSensor=true })
 	exit.myName = "exit"
 
@@ -305,25 +334,7 @@ function scene:create( event )
   arnold.alpha = 0
   arnold.myName = "arnold"
   
-  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
-	lever.anchorX = 0
-	lever.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	lever.x, lever.y = 0, 225
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	leverShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( lever, "static", { friction=0.3 } )
   
-  winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-	winch.anchorX = 0
-	winch.anchorY = 1
-	--  draw the grass at the very bottom of the screen
-	winch.x, winch.y = 750, 880
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local winchShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( winch, "static", { friction=0.3 } )
 
     --explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
 	--explodingThing.x, explodingThing.y = 500, 950
@@ -382,12 +393,12 @@ function scene:create( event )
 
 
   local platforms = {
-      createPlatform (300, 680, 400),
-      createPlatform (1200, 680, 400),
-      createPlatform (700, 480, 400),
-      createPlatform (0, 280, 200),
-      createPlatform (400, 280, 300),
-      createPlatform (1520, 280, 400),
+      createPlatform (300, 639, 400),
+      createPlatform (1200, 639, 400),
+      createPlatform (700, 439, 400),
+      createPlatform (0, 239, 200),
+      createPlatform (400, 239, 300),
+      createPlatform (1520, 239, 400),
     }
 
 	-- all display objects must be inserted into group
