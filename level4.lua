@@ -9,19 +9,23 @@ local utils = require("utils")
 
 local scene = composer.newScene()
 local sceneGroup
+
 local flames 
 local arnold,player
+
 local arnieDefaultCountdownTime = 8
 local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
 local shootLoopTimer
-local gameOver = false
+local gameEnded = false
+local angryArnold = false
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
 local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch, flame
+
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
 local platforms = {}
@@ -52,6 +56,7 @@ local arnoldSequenceData = {
     {name="running", start=1, count=6, time=575, loopCount=0}
   }
 
+
 local flamesSheetData = {width = 200, height = 300, numFrames = 17, sheetContentWidth = 3400, sheetContentHeight= 300 }
 local flamesSheet1 = graphics.newImageSheet("/Images/Things/flamesAnim.png", flamesSheetData)
 
@@ -59,6 +64,7 @@ local flamesSequenceData = {
     {name="burning", start=1, count=17, time=1500, loopCount=0}
   }
   
+
   -- Enemy idle animation
 local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1470, sheetContentHeight= 210 }
 local enemyIdleSheet = graphics.newImageSheet("/Images/Character/enemyIdle.png", enemyIdleSheetData)
@@ -95,7 +101,7 @@ local function canArnieKillSomeone()
 end
 
 local function arnoldMover(index)
-  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill or gameOver== true) then
+  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill or gameEnded== true) then
     return
   end
 
@@ -177,58 +183,6 @@ local function objectCollide(self, event)
 end
 
 
--- Called when a key event has been received
-local function onKeyEvent( event )
-
-    if event.keyName == "left" then
-		if event.phase == "down" then
-			leftPressed = true
-		elseif event.phase == "up" then
-			leftPressed = false
-		end
-	end
-
-	if event.keyName == "right" then
-		if event.phase == "down" then
-			rightPressed = true
-		elseif event.phase == "up" then
-			rightPressed = false
-		end
-	end
-
-	if ((event.keyName == "up") and (event.phase == "down")) then
-        if player.sensorOverlaps > 0 then
-            -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
-            canDoubleJump = true
-            player:setLinearVelocity(0, -500)
-        elseif canDoubleJump then
-            canDoubleJump = false
-            player:setLinearVelocity(0, -500)
-        end
-	end
-
-    if event.keyName == "e" then
-		if event.phase == "down" then
-            if playerInContactWith then
-    			if playerInContactWith.myName == "lever" then
-    				toggleExit()
-                    audio.play(utils.sounds["explosion"])
-    			end
-            end
-		end
-	end
-
-    if event.keyName == "space" then
-		if event.phase == "down" then
-			utils.fire(player)
-		end
-	end
-    -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
-    -- This lets the operating system execute its default handling of the key
-    return false
-end
-
-
 local function gameLoop()
     if leftPressed then
         player.xScale = -1
@@ -245,72 +199,78 @@ local function gameLoop()
         else
             player:pause()
         end
-    end    
+    end
 end
 
 local function shootLoop()
+  if(angryArnold) then
+    utils.fireAtPlayer(arnold,player)
+  end
+  
   canArnieKillSomeone()
 end
 
 function createEnemy(xPosition, yPosition, type)
-  enemiesCount = enemiesCount +1 
-  if(type == "enemy") then  
+  enemiesCount = enemiesCount +1
+  if(type == "enemy") then
     enemies[enemiesCount]= display.newSprite(enemyIdleSheet, enemyIdleSequenceData)
     enemies[enemiesCount]:setSequence("idle")
     enemies[enemiesCount]:play()
+    timer.performWithDelay(1, function() physics.addBody( enemies[enemiesCount], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } ) end, 1)
   elseif(type == "deadEnemy") then
-     enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200) 
-  end  
+     enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200)
+     timer.performWithDelay(1, function() physics.addBody( enemies[enemiesCount], "static", { isSensor = true } ) end, 1)
+     enemies[enemiesCount].collision = objectCollide
+     enemies[enemiesCount]:addEventListener( "collision" )
+  end
   enemies[enemiesCount].myName="enemy"
   enemies[enemiesCount].enemyIndex=enemiesCount
   enemies[enemiesCount].x = xPosition
   enemies[enemiesCount].y = yPosition
-  
-  
-  physics.addBody( enemies[enemiesCount], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } )
   enemies[enemiesCount].isFixedRotation = true
   sceneGroup:insert( enemies[enemiesCount] )
-  
+
   end
 
 local function enemyHit(enemy)
   local x,y = enemy.x,enemy.y
   display.remove(enemy)
-  createEnemy(x,y,"deadEnemy")  
+  createEnemy(x,y,"deadEnemy")
 end
 
-local function resurrectHit(enemy)
+local function resurrectEnemy(enemy)
   local x,y = enemy.x,enemy.y
   display.remove(enemy)
-  createEnemy(x,y,"enemy")  
+  createEnemy(x,y,"enemy")
 end
 
 function leaveGame()
-  
-  
+
+
   for i=1,#platforms do
           display.remove(platforms[i])
-        end 
-        
+        end
+
   for i=1,#enemies do
     if(enemies[i].isPlaying == true) then
        enemies[i]:pause()
        display.remove(enemies[i])
-    end          
+    end
   end
-  
+
   display.remove(player)
   display.remove(arnold)
-  
+  display.remove(exit)
+  display.remove(lever)
+  display.remove(winch)
+
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
-  composer.gotoScene("menu", "slideRight")  
+  composer.gotoScene("menu", "slideRight")
 end
 
-
-
 function gameOver()
-  gameOver = true
+  gameEnded = true
   gameoverBackground = display.newRect( 0, 0 , display.contentWidth* 1.25, display.contentHeight * 1.25)
       gameoverBackground.x =display.contentWidth*0.5
       gameoverBackground.y = display.contentHeight*0.5
@@ -319,11 +279,11 @@ function gameOver()
   gameOverScreen = display.newImageRect( "Images/Scene/UI/hasta/hasta_001.png",1920, 1080)
   gameOverScreen.x = display.contentWidth*0.5
   gameOverScreen.y = display.contentHeight*0.5
-  
+
   timer.cancel(gameLoopTimer)
   timer.cancel(shootLoopTimer)
   timer.cancel(countDownTimer)
-  
+
   countDownTimer = timer.performWithDelay( 2000, leaveGame, 1 )
 end
 
@@ -375,69 +335,119 @@ local function onCollision( event )
     end
 end
 
+
+-- Called when a key event has been received
+local function onKeyEvent( event )
+
+    if event.keyName == "left" then
+		if event.phase == "down" then
+			leftPressed = true
+		elseif event.phase == "up" then
+			leftPressed = false
+		end
+	end
+
+	if event.keyName == "right" then
+		if event.phase == "down" then
+			rightPressed = true
+		elseif event.phase == "up" then
+			rightPressed = false
+		end
+	end
+
+	if ((event.keyName == "up") and (event.phase == "down")) then
+        if player.sensorOverlaps > 0 then
+            -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
+            canDoubleJump = true
+            player:setLinearVelocity(0, -500)
+        elseif canDoubleJump then
+            canDoubleJump = false
+            player:setLinearVelocity(0, -500)
+        end
+	end
+
+    if event.keyName == "e" then
+		if event.phase == "down" then
+            if playerInContactWith then
+    			if playerInContactWith.myName == "lever" then
+    				toggleExit()
+                    audio.play(utils.sounds["explosion"])
+    			end
+                if playerInContactWith.myName == "enemy" then
+                    resurrectEnemy(playerInContactWith)
+                end
+            end
+		end
+	end
+    -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
+    -- This lets the operating system execute its default handling of the key
+    return false
+end
+
+
+
 local function createPlatform (positionX, positionY, typePlatform)
   local platform
   platformCount = platformCount + 1
-  if (typePlatform == "A") then
-    
+   if (typePlatform == "A") then
+
      platform = display.newImageRect("Images/Scene/background/platform_A.png", 206, 92 )
      local nwA, nhA = platform.width*scaleX*0.9, platform.height*scaleY*0.5
      physics.addBody( platform, "static", { friction=0.3, shape ={-nwA,-nhA,nwA,-nhA,nwA,nhA,-nwA,nhA} })
      platform.anchorX = 0.5
      platform.anchorY = 0.5
-          
+
    elseif (typePlatform == "B") then
      platform = display.newImageRect( "Images/Scene/background/platform_B.png", 350, 62)
-     local nwB, nhB = platform.width*scaleX*0.9, platform.height*scaleY*0.7 
+     local nwB, nhB = platform.width*scaleX*0.9, platform.height*scaleY*0.7
      physics.addBody( platform, "static", { friction=0.3, shape ={-nwB,-nhB,nwB,-nhB,nwB,nhB,-nwB,nhB} })
      platform.anchorX = 0.5
      platform.anchorY = 0.5
-     
+
    elseif (typePlatform == "C") then
      platform = display.newImageRect( "Images/Scene/background/platform_C.png", 503, 82)
-     local nwC, nhC = platform.width*scaleX*0.95, platform.height*scaleY*0.6 
+     local nwC, nhC = platform.width*scaleX*0.95, platform.height*scaleY*0.6
      physics.addBody( platform, "static", { friction=0.3, shape ={-nwC,-nhC,nwC,-nhC,nwC,nhC,-nwC,nhC} })
      platform.anchorX = 0.5
      platform.anchorY = 0.45
-     
+
    elseif (typePlatform == "D") then
      platform = display.newImageRect( "Images/Scene/background/platform_D.png", 845, 70)
-     local nwD, nhD = platform.width*scaleX*0.97, platform.height*scaleY*0.7 
+     local nwD, nhD = platform.width*scaleX*0.97, platform.height*scaleY*0.7
      physics.addBody( platform, "static", { friction=0.3, shape ={-nwD,-nhD,nwD,-nhD,nwD,nhD,-nwD,nhD} })
      platform.anchorX = 0.49
      platform.anchorY = 0.5
-     
+
    elseif (typePlatform == "AP") then
      platform = display.newImageRect( "Images/Scene/background/platform_plant_A.png", 232, 199)
      physics.addBody( platform, "static", { friction=0.3, shape ={-80,35, 90,35, 90,75, -80,75} })
      platform.anchorX = 0.5
      platform.anchorY = 0.5
-     
+
    elseif (typePlatform == "BP") then
      platform = display.newImageRect( "Images/Scene/background/platform_plant_B.png", 348, 128)
      physics.addBody( platform, "static", { friction=0.3, shape ={-165,5 , 160,5 , 160,50  , -165,50} })
      platform.anchorX = 0.5
      platform.anchorY = 0.5
-     
+
    elseif (typePlatform == "CP") then
      platform = display.newImageRect( "Images/Scene/background/platform_plant_C.png", 505, 195)
      physics.addBody( platform, "static", { friction=0.3, shape ={-233,32 , 235,32 , 235,72 , -235,70} })
      platform.anchorX = 0.5
      platform.anchorY = 0.5
-     
+
    elseif (typePlatform == "DP") then
      platform = display.newImageRect( "Images/Scene/background/platform_plant_D.png", 841, 197)
      physics.addBody( platform, "static", { friction=0.3, shape ={-420.5,45 , 400,45 , 400,85 , -420,85} })
      platform.anchorX = 0.5
      platform.anchorY = 0.5
-     
+
    end
    platform.x, platform.y = positionX, positionY
   platforms[platformCount]= platform
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-    
-  end
+ end
 -- include Corona's "physics" library
 local physics = require "physics"
 
@@ -548,6 +558,32 @@ function scene:create( event )
 	local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( grass, "static", { friction=0.3 } )  
 
+
+
+  --local ground1 = display.newImageRect( "Images/Scene/ground.png", 1200, 41)
+	--ground1.anchorX = 0
+	--ground1.anchorY = 1
+
+	--ground1.x, ground1.y = display.screenOriginX, 938
+
+	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
+	--local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	--physics.addBody( ground1, "static", { friction=0.3 } )
+
+  --local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
+	--ground2.anchorX = 0
+	--ground2.anchorY = 1
+
+	--ground2.x, ground2.y = 1385, 880
+
+	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
+	--local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	--physics.addBody( ground2, "static", { friction=0.3 } )
+
+
+
+
+
     --sendArnie()
 
 	-- all display objects must be inserted into group
@@ -580,7 +616,13 @@ local function teleportIn()
 end
 
 function sendArnie()
-
+    angryArnold = false
+    for i=1,#enemies do
+    if(enemies[i] and enemies[i].myName=="deadEnemy") then
+       angryArnold = true
+       print("Arnold is ANGRY///////")
+    end          
+  end
    if(arnold ~= nil) then
     display.remove(arnold)
    end
@@ -593,7 +635,7 @@ function sendArnie()
 
   physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
   arnold.isFixedRotation = true
-  
+
 
   teleportIn()
 
@@ -618,14 +660,14 @@ function scene:show( event )
       createPlatform (85, 210, "AP"),
       createPlatform (1000, 300, "BP"),
       createPlatform (1750, 270, "B"),
-          
+
     }
     leftPressed = false
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
 	gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
-  shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
+    shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
 

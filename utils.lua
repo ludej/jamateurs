@@ -36,4 +36,19 @@ local function fire(shooter)
 end
 utils.fire = fire
 
+local function fireAtPlayer(shooter, player)
+    --local bullet = display.newSprite(bulletSheet, bulletSequenceData)
+    local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
+    physics.addBody(bullet, "dynamic", {isSensor=true})
+    bullet.isBullet = true
+    bullet.myName = "bullet"
+    bullet.x = shooter.x + 100
+    bullet.y = shooter.y
+    --bullet:setSequence("fly")
+    --bullet:play()
+    transition.to(bullet, {x=player.x,y=player.y, time=1000, onComplete = function() display.remove(bullet) end})
+    audio.play(utils.sounds["shooting"][math.random(1, #utils.sounds["shooting"])])
+end
+utils.fire = fire
+
 return utils
