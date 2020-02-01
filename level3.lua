@@ -115,22 +115,13 @@ local function canArnieKillSomeone()
    --print( "Checking hits" )
   if(arnold.x == nil) then
     return
-    end
+  end
+  
   local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + 1000, arnold.y, "closest" )
   if ( hits ) then
  
-  if (hits[1].object.myName == "player") then
-    -- There's at least one hit
-      print( "Hit count: " .. tostring( #hits ) )
-      fire(arnold)
-    -- Output the results
-      for i,v in ipairs( hits ) do
-          print( "Hit: ", i, v.object, " Position: ", v.position.x, v.position.y, " Surface normal: ", v.normal.x, v.normal.y )
-      end
- 
-      print( "The first object hit is: ", hits[1].object, " at position: ", hits[1].position.x, hits[1].position.y, " where the surface normal is: ", hits[1].normal.x, hits[1].  normal.y, " and where the fraction along the ray is: ", hits[1].fraction )
-    else
-    -- No hits on raycast
+    if (hits[1].object.myName == "player") then   
+      fire(arnold) 
     end
   end
 end

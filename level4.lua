@@ -48,12 +48,12 @@ local arnoldSequenceData = {
 
 local arnoldMovements = {
     {action = "sound", actionData = hastaLaVistaSound},
-    {action = "move", actionData = 300},
+    {action = "move", actionData = 100},
     {action = "jump", actionData = -600},    
     {action = "move", actionData = 550},
     {action = "shoot", actionData = 1},
-    {action = "move", actionData = 750},    
-  }
+    {action = "move", actionData = 350},    
+  } 
   
   -- Shoot a gun
 local function fire(shooter)
@@ -65,6 +65,21 @@ local function fire(shooter)
     bullet.y = shooter.y
     transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
     audio.play(shootingSounds[math.random(1, #shootingSounds)])
+end
+
+local function canArnieKillSomeone()
+   --print( "Checking hits" )
+  if(arnold.x == nil) then
+    return
+  end
+  
+  local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + 1000, arnold.y, "closest" )
+  if ( hits ) then
+ 
+    if (hits[1].object.myName == "player") then   
+      fire(arnold) 
+    end
+  end
 end
 
 local function arnoldMover(index)
@@ -191,6 +206,7 @@ local function gameLoop()
             crate:pause()
         end
     end
+    canArnieKillSomeone()
 end
 
 
