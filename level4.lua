@@ -18,7 +18,7 @@ local gameLoopTimer
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
 local crate, entrancePortal, exit, explodingThing, lever, winch
-local playerInContactWith = nil
+local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
 
 
@@ -109,6 +109,23 @@ local function sensorCollide( self, event )
 end
 
 
+local function objectCollide(self, event)
+    if ( event.phase == "began" ) then
+        if event.other.myName == "player" then
+            playerInContactWith = self
+        elseif event.other.myName == "arnold" then
+            arnoldInContactWith = self
+        end
+    elseif ( event.phase == "ended" ) then
+        if event.other.myName == "player" then
+            playerInContactWith = nil
+        elseif event.other.myName == "arnold" then
+            arnoldInContactWith = nil
+        end
+    end
+end
+
+
 -- Called when a key event has been received
 local function onKeyEvent( event )
 
@@ -151,14 +168,6 @@ local function onKeyEvent( event )
     if event.keyName == "space" then
 		if event.phase == "down" then
 			utils.fire(crate)
-		end
-	end
-
-  if event.keyName == "e" then
-		if event.phase == "down" then
-			if playerInContactWith then
-				display.remove(playerInContactWith)
-			end
 		end
 	end
     -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
@@ -286,6 +295,8 @@ function scene:create( event )
 	lever.x, lever.y = 0, 225
     lever.myName = "paka"
 	physics.addBody( lever, "static", { isSensor=true } )
+    lever.collision = objectCollide
+    lever:addEventListener( "collision" )
 
     winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
     winch.anchorX = 0
@@ -293,11 +304,8 @@ function scene:create( event )
     winch.x, winch.y = 750, 880
     physics.addBody( winch, "static", { isSensor=true } )
     winch.myName = "navijak"
-
-  explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
-  explodingThing.x, explodingThing.y = 1500, 950
-  physics.addBody(explodingThing, "static", { isSensor=true })
-  explodingThing.myName = "explodingThing"
+    winch.collision = objectCollide
+    winch:addEventListener( "collision" )
 
 
   crate = display.newSprite(playerSheet1, playerSequenceData)
