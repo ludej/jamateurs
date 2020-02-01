@@ -11,10 +11,11 @@ local arnold,player
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
-local leftPressed, rightPressed, upPressed
+local leftPressed, rightPressed
 local crate, entrancePortal, exit, explodingThing
 local playerInContactWith = nil
 local gameLoopTimer
+local canDoubleJump
 local explosionSound = audio.loadSound("sound/plop.wav")
 local teleportSound = audio.loadSound("sound/teleport_01.wav")
 local shootingSounds = {
@@ -76,6 +77,20 @@ local function arnoldMover(index)
 end
 
 
+local function sensorCollide( self, event )
+    -- Confirm that the colliding elements are the foot sensor and a ground object
+    if ( event.selfElement == 2 and event.other.objType == "ground" ) then
+        -- Foot sensor has entered (overlapped) a ground object
+        if ( event.phase == "began" ) then
+            self.sensorOverlaps = self.sensorOverlaps + 1
+        -- Foot sensor has exited a ground object
+        elseif ( event.phase == "ended" ) then
+            self.sensorOverlaps = self.sensorOverlaps - 1
+        end
+    end
+end
+
+
 -- Shoot a gun
 local function fire()
     local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
@@ -108,11 +123,15 @@ local function onKeyEvent( event )
 		end
 	end
 
-	if event.keyName == "up" then
-		if event.phase == "down" then
-			-- crate:applyLinearImpulse( 0, -0.75, crate.x, crate.y )
-			crate:setLinearVelocity(0, -500)
-		end
+	if ((event.keyName == "up") and (event.phase == "down")) then
+        if crate.sensorOverlaps > 0 then
+            -- crate:applyLinearImpulse( 0, -0.75, crate.x, crate.y )
+            canDoubleJump = true
+            crate:setLinearVelocity(0, -500)
+        elseif canDoubleJump then
+            canDoubleJump = false
+            crate:setLinearVelocity(0, -500)
+        end
 	end
 
     if event.keyName == "e" then
@@ -239,9 +258,15 @@ function scene:create( event )
 	explodingThing.myName = "explodingThing"
 
 	-- add physics to the crate
-	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0 } )
+	physics.addBody(
+        crate, "dynamic",
+        { density=1.0, friction=0.3, bounce=0 },
+        { box={ halfWidth=30, halfHeight=10, x=0, y=95 }, isSensor=true } )
     crate.isFixedRotation = true
-    physics.addBody( arnold, { density=1.0, friction=0.3, bounce=0 } )
+    crate.sensorOverlaps = 0
+    crate.collision = sensorCollide
+    crate:addEventListener( "collision" )
+    physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0 } )
     arnold.isFixedRotation = true
 
 	-- create a grass object and add physics (with custom shape)
@@ -254,12 +279,14 @@ function scene:create( event )
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( grass, "static", { friction=0.3 } )
+    grass.objType = "ground"
 
     local grass2 = display.newImageRect( "grass.png", 860, 82)
 	grass2.anchorX = 0
 	grass2.anchorY = 1
 	--  draw the grass at the very bottom of the screen
 	grass2.x, grass2.y = 1460, display.actualContentHeight + display.screenOriginY
+    grass2.objType = "ground"
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local grass2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
@@ -269,8 +296,8 @@ function scene:create( event )
 	local platform = display.newImageRect( "Images/Scene/platform.png", 300, 82)
 	platform.anchorX = 0
 	platform.anchorY = 1
-
 	platform.x, platform.y = 1000, 800
+    platform.objType = "ground"
 
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
