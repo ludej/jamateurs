@@ -4,6 +4,7 @@
 --
 -----------------------------------------------------------------------------------------
 
+--require("mobdebug").start()
 local composer = require( "composer" )
 local scene = composer.newScene()
 
@@ -55,18 +56,6 @@ local arnoldMovements = {
     {action = "move", actionData = 550},
   }
 
-  -- Shoot a gun
-local function fire(shooter)
-    local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
-    physics.addBody(bullet, "static", {isSensor=true})
-    bullet.isBullet = true
-    bullet.myName = "bullet"
-    bullet.x = shooter.x
-    bullet.y = shooter.y
-    transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
-    audio.play(shootingSounds[math.random(1, #shootingSounds)])
-end
-
 local function arnoldMover(index)
   if(index > #arnoldMovements) then
     return
@@ -110,14 +99,29 @@ local function sensorCollide( self, event )
     end
 end
 
+local function canArnieKillSomeone()
+   --print( "Checking hits" )
+  if(arnold.x == nil) then
+    return
+  end
+
+  local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + 1000, arnold.y, "closest" )
+  if ( hits ) then
+
+    if (hits[1].object.myName == "player") then
+      fire(arnold)
+    end
+  end
+end
+
 
 -- Shoot a gun
 local function fire(shooter)
     local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
-    physics.addBody(bullet, "static", {isSensor=true})
+    physics.addBody(bullet, "dynamic", {isSensor=true})
     bullet.isBullet = true
     bullet.myName = "bullet"
-    bullet.x = shooter.x
+    bullet.x = shooter.x + 100
     bullet.y = shooter.y
     transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
     audio.play(shootingSounds[math.random(1, #shootingSounds)])
@@ -191,11 +195,12 @@ local function gameLoop()
             crate:pause()
         end
     end
+
+    canArnieKillSomeone()
 end
 
 
 local function onCollision( event )
-
     if ( event.phase == "began" ) then
         local obj1 = event.object1
         local obj2 = event.object2
@@ -212,10 +217,18 @@ local function onCollision( event )
                 onComplete=function() display.remove(arnold) end} )
         end
         if (obj1.myName == "bullet" or obj2.myName == "bullet") then
+            local bullet, target
             if obj1.myName == "bullet" then
-                display.remove( obj1 )
+                bullet, target = obj1, obj2
             else
-                display.remove( obj2 )
+                bullet, target = obj2, obj1
+            end
+            if target.myName ~= "arnold" then
+                display.remove(bullet)
+                if target.myName == "player" then
+                    timer.cancel( gameLoopTimer )
+                    display.remove(target)
+                end
             end
         end
 	elseif ( event.phase == "ended" ) then
@@ -280,7 +293,7 @@ function scene:create( event )
 
     explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
 	explodingThing.x, explodingThing.y = 500, 950
-	physics.addBody(explodingThing, "static", { isSensor=true })
+	physics.addBody(explodingThing, "static")
 	explodingThing.myName = "explodingThing"
 
 	-- add physics to the crate
@@ -305,14 +318,12 @@ function scene:create( event )
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( grass, "static", { friction=0.3 } )
-    grass.objType = "ground"
 
     local grass2 = display.newImageRect( "grass.png", 860, 82)
 	grass2.anchorX = 0
 	grass2.anchorY = 1
 	--  draw the grass at the very bottom of the screen
 	grass2.x, grass2.y = 1460, display.actualContentHeight + display.screenOriginY
-    grass2.objType = "ground"
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local grass2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
@@ -323,7 +334,6 @@ function scene:create( event )
 	platform.anchorX = 0
 	platform.anchorY = 1
 	platform.x, platform.y = 1000, 800
-    platform.objType = "ground"
 
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
@@ -348,11 +358,9 @@ function scene:show( event )
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
         local function teleportIn()
-            timer.pause(gameLoopTimer)
             transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(teleportSound) end} )
             transition.fadeIn(arnold, {
                 time=500, delay=800, onComplete=function()
-                    timer.resume(gameLoopTimer)
                     arnold:setSequence("running")
                     arnold:play()
                     arnoldMover(1)
