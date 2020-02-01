@@ -47,8 +47,8 @@ local playerSheet1 = graphics.newImageSheet("/Images/Character/heroAnim.png", pl
 
 
 local playerSequenceData = {
-    {name="idle", start=1, count=4, time=575, loopCount=0},
-    {name="running", start=5, count=6, time=575, loopCount=0}
+    {name="idle", start=1, count=4, time=800, loopCount=0},
+    {name="running", start=5, count=6, time=800, loopCount=0}
   }
 
 -- Arnold movement animation
@@ -221,38 +221,41 @@ local function shootLoop()
   canArnieKillSomeone()
 end
 
-function createEnemy(xPosition, yPosition, type)
-  enemiesCount = enemiesCount +1
-  if(type == "enemy") then
-    enemies[enemiesCount]= display.newSprite(enemyIdleSheet, enemyIdleSequenceData)
-    enemies[enemiesCount]:setSequence("idle")
-    enemies[enemiesCount]:play()
-    timer.performWithDelay(1, function() physics.addBody( enemies[enemiesCount], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } ) end, 1)
-  elseif(type == "deadEnemy") then
-     enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200)
-     timer.performWithDelay(1, function() physics.addBody( enemies[enemiesCount], "static", { isSensor = true } ) end, 1)
-     enemies[enemiesCount].collision = objectCollide
-     enemies[enemiesCount]:addEventListener( "collision" )
+function createEnemy(xPosition, yPosition, type, index)
+  if(index<0) then
+    enemiesCount = enemiesCount +1
+    index = enemiesCount
   end
-  enemies[enemiesCount].myName="enemy"
-  enemies[enemiesCount].enemyIndex=enemiesCount
-  enemies[enemiesCount].x = xPosition
-  enemies[enemiesCount].y = yPosition
-  enemies[enemiesCount].isFixedRotation = true
-  sceneGroup:insert( enemies[enemiesCount] )
+  if(type == "enemy") then
+    enemies[index]= display.newSprite(enemyIdleSheet, enemyIdleSequenceData)
+    enemies[index]:setSequence("idle")
+    enemies[index]:play()
+    timer.performWithDelay(1, function() physics.addBody( enemies[index], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } ) end, 1)
+  elseif(type == "deadEnemy") then
+     enemies[index]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200)
+     timer.performWithDelay(1, function() physics.addBody( enemies[index], "static", { isSensor = true } ) end, 1)
+     enemies[index].collision = objectCollide
+     enemies[index]:addEventListener( "collision" )
+  end
+  enemies[index].myName=type
+  enemies[index].enemyIndex=enemiesCount
+  enemies[index].x = xPosition
+  enemies[index].y = yPosition
+  enemies[index].isFixedRotation = true
+  sceneGroup:insert( enemies[index] )
 
   end
 
 local function enemyHit(enemy)
   local x,y = enemy.x,enemy.y
   display.remove(enemy)
-  createEnemy(x,y,"deadEnemy")
+  createEnemy(x,y,"deadEnemy", enemy.enemyIndex)
 end
 
 local function resurrectEnemy(enemy)
   local x,y = enemy.x,enemy.y
   display.remove(enemy)
-  createEnemy(x,y,"enemy")
+  createEnemy(x,y,"enemy", enemy.enemyIndex)
 end
 
 function leaveGame()
@@ -389,7 +392,8 @@ local function onKeyEvent( event )
     				toggleExit()
                     audio.play(utils.sounds["explosion"])
     			end
-                if playerInContactWith.myName == "enemy" then
+                if playerInContactWith.myName == "deadEnemy" then
+                    print("In contact with enemy for resurrection")
                     resurrectEnemy(playerInContactWith)
                 end
             end
@@ -694,8 +698,9 @@ function scene:show( event )
 
     arnieCountdownTime = arnieDefaultCountdownTime
         Runtime:addEventListener( "collision", onCollision )
+
     physics.start() 
-    createEnemy(1400,900,"enemy")
+    createEnemy(1400,900,"enemy", -1)
       
     
 	end
