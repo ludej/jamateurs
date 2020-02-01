@@ -13,7 +13,23 @@ local screenW, screenH, halfW = display.actualContentWidth, display.actualConten
 local leftPressed, rightPressed, upPressed
 local crate, explodingThing
 local playerInContactWith = nil
-local explosionSound = audio.loadSound( "sound/plop.wav" )
+local explosionSound = audio.loadSound("sound/plop.wav")
+local shootingSounds = {
+    audio.loadSound("sound/shoot_01.wav"),
+    audio.loadSound("sound/shoot_02.wav"),
+    audio.loadSound("sound/shoot_03.wav")}
+
+
+local function fire()
+    local bullet = display.newImageRect("Images/Things/red-square.png", 10, 10)
+    physics.addBody(bullet, "static", {isSensor=true})
+    bullet.isBullet = true
+    bullet.myName = "bullet"
+    bullet.x = crate.x
+    bullet.y = crate.y
+    transition.to(bullet, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
+    audio.play(shootingSounds[math.random(1, #shootingSounds)])
+end
 
 
 -- Called when a key event has been received
@@ -47,6 +63,12 @@ local function onKeyEvent( event )
 				display.remove(playerInContactWith)
                 audio.play(explosionSound)
 			end
+		end
+	end
+
+    if event.keyName == "space" then
+		if event.phase == "down" then
+			fire()
 		end
 	end
 
