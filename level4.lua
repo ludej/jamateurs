@@ -278,11 +278,11 @@ function scene:create( event )
 	local ground1Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	physics.addBody( ground1, "static", { friction=0.3 } )
   
-  local ground2 = display.newImageRect( "Images/Scene/ground.png", 620, 41)
+  local ground2 = display.newImageRect( "Images/Scene/ground.png", 535, 41)
 	ground2.anchorX = 0
 	ground2.anchorY = 1
 	
-	ground2.x, ground2.y = 1300, 938
+	ground2.x, ground2.y = 1385, 938
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
