@@ -4,6 +4,7 @@
 --
 -----------------------------------------------------------------------------------------
 
+--require("mobdebug").start()
 local composer = require( "composer" )
 local scene = composer.newScene()
 
@@ -13,6 +14,15 @@ local screenW, screenH, halfW = display.actualContentWidth, display.actualConten
 local leftPressed, rightPressed, upPressed
 local crate, explodingThing
 local playerInContactWith = nil
+
+-- Character movement animation
+local playerSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
+local playerSheet1 = graphics.newImageSheet("/Images/Character/characterAnm.png", playerSheetData)
+
+
+local playerSequenceData = {
+    {name="running", start=1, count=8, time=575, loopCount=0}
+  }
 
 
 -- Called when a key event has been received
@@ -57,11 +67,22 @@ end
 
 local function gameLoop()
     if leftPressed then
-		crate.x = crate.x - 10
+      crate.xScale = -1 
+      crate.x = crate.x - 10
 	end
 	if rightPressed then
 		crate.x = crate.x + 10
+    crate.xScale = 1 
 	end
+  
+  if(leftPressed or rightPressed) then    
+    
+    if(crate.isPlaying == false) then
+      crate:play()
+    end    
+  else
+    crate:pause()
+  end  
 end
 
 
@@ -116,10 +137,12 @@ function scene:create( event )
 	background:setFillColor( .5 )
 
 	-- make a crate (off-screen), position it, and rotate slightly
-	crate = display.newImageRect( "crate.png", 90, 90 )
+	--crate = display.newImageRect( "crate.png", 90, 90 )
+  crate = display.newSprite(playerSheet1, playerSequenceData)
 	crate.x, crate.y = 160, -100
 	crate.rotation = 15
 	crate.myName = "player"
+  crate:setSequence("running") -- running is defined in pirate sequence data
 
 	-- add physics to the crate
 	physics.addBody( crate, { density=1.0, friction=0.3, bounce=0 } )
