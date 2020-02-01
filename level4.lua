@@ -73,7 +73,7 @@ local function canArnieKillSomeone()
 end
 
 local function arnoldMover(index)
-  if(index > #arnoldMovements) then
+  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill) then
     return
   end
 
@@ -468,7 +468,10 @@ local function teleportIn()
 end
 
 function sendArnie()
-     
+   if(arnold ~= nil) then
+    display.remove(arnold)   
+   end
+   
    arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
   --arnold:scale(0.5,0.5)
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
