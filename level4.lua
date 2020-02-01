@@ -8,6 +8,7 @@ local composer = require( "composer" )
 local utils = require("utils")
 
 local scene = composer.newScene()
+local sceneGroup
 
 local arnold,player
 local arnieDefaultCountdownTime = 8
@@ -21,6 +22,8 @@ local leftPressed, rightPressed
 local crate, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
+local enemies = {}
+local enemiesCount = 0
 
 
 local nw, nh
@@ -28,12 +31,12 @@ local scaleX,scaleY = 0.5,0.5
 
 
 -- Character movement animation
-local playerSheetData = {width = 185, height = 195, numFrames = 8, sheetContentWidth = 1480, sheetContentHeight= 195 }
+local playerSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1260, sheetContentHeight= 210 }
 local playerSheet1 = graphics.newImageSheet("/Images/Character/heroRun.png", playerSheetData)
 
 
 local playerSequenceData = {
-    {name="running", start=1, count=8, time=575, loopCount=0}
+    {name="running", start=1, count=6, time=575, loopCount=0}
   }
 
 -- Arnold movement animation
@@ -42,19 +45,18 @@ local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", ar
 
 
 local arnoldSequenceData = {
-    {name="running", start=1, count=8, time=575, loopCount=0}
+    {name="running", start=1, count=6, time=575, loopCount=0}
   }
 
 local arnoldMovements = {
     {action = "sound", actionData = utils.sounds["hastaLaVista"]},
-     {action = "jump", actionData = -600},
-    {action = "move", actionData = 200},
-    {action = "jump", actionData = -600},
-    {action = "move", actionData = 550},
-    {action = "shoot", actionData = 1},
     {action = "move", actionData = 350},
+    {action = "move", actionData = 350},
+    {action = "move", actionData = 250},
     {action = "jump", actionData = -600},
-    {action = "move", actionData = 450},
+    {action = "move", actionData = 650},
+    {action = "jump", actionData = -500},
+    {action = "move", actionData = -390},
   }
 
 local function canArnieKillSomeone()
@@ -66,8 +68,8 @@ local function canArnieKillSomeone()
   local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + 1000, arnold.y, "closest" )
   if ( hits ) then
 
-    if (hits[1].object.myName == "player") then
-      utils.fire(arnold)
+    if (hits[1].object.myName == "player" or hits[1].object.myName == "enemy") then
+    utils.fire(arnold)
     end
   end
 end
@@ -227,6 +229,36 @@ local function gameLoop()
     canArnieKillSomeone()
 end
 
+function createEnemy(xPosition, yPosition, type)
+  enemiesCount = enemiesCount +1 
+  if(type == "enemy") then  
+    enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyAlive.png", 200, 200)
+  elseif(type == "deadEnemy") then
+     enemies[enemiesCount]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200) 
+  end  
+  enemies[enemiesCount].myName="enemy"
+  enemies[enemiesCount].enemyIndex=enemiesCount
+  enemies[enemiesCount].x = xPosition
+  enemies[enemiesCount].y = yPosition
+  
+  
+  physics.addBody( enemies[enemiesCount], "dynamic", { density=1.0, friction=0.3, bounce=0 } )
+  enemies[enemiesCount].isFixedRotation = true
+  sceneGroup:insert( enemies[enemiesCount] )
+  
+  end
+
+local function enemyHit(enemy)
+  local x,y = enemy.x,enemy.y
+  display.remove(enemy)
+  createEnemy(x,y,"deadEnemy")  
+end
+
+local function resurrectHit(enemy)
+  local x,y = enemy.x,enemy.y
+  display.remove(enemy)
+  createEnemy(x,y,"enemy")  
+end
 
 local function onCollision( event )
 
@@ -259,6 +291,8 @@ local function onCollision( event )
                 if target.myName == "player" then
                     timer.cancel( gameLoopTimer )
                     display.remove(target)
+                elseif(target.myName == "enemy") then
+                  enemyHit(target)
                 end
             end
         end
@@ -458,7 +492,8 @@ function sendArnie()
   arnold.myName = "arnold"
 
   physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
-    arnold.isFixedRotation = true
+  arnold.isFixedRotation = true
+  
 
   teleportIn()
 
@@ -467,7 +502,7 @@ end
 
 
 function scene:show( event )
-	local sceneGroup = self.view
+	sceneGroup = self.view
 	local phase = event.phase
 
 	if phase == "will" then
@@ -483,7 +518,9 @@ function scene:show( event )
 
     arnieCountdownTime = arnieDefaultCountdownTime
         Runtime:addEventListener( "collision", onCollision )
-        physics.start()
+    physics.start() 
+    createEnemy(1000,1100,"enemy")
+      
 	end
 end
 
