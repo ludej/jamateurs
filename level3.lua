@@ -165,13 +165,13 @@ local function onCollision( event )
 			(obj1.myName == "explodingThing" and obj2.myName == "player")) then
 			playerInContactWith = explodingThing
 		end
-        if ((obj1.myName == "player" and obj2.myName == "exit") or
-			(obj1.myName == "exit" and obj2.myName == "player")) then
-            timer.cancel( gameLoopTimer )
-            transition.to(crate, {x=exit.x})
+        if ((obj1.myName == "arnold" and obj2.myName == "exit") or
+			(obj1.myName == "exit" and obj2.myName == "arnold")) then
+            -- timer.cancel( gameLoopTimer )
+            transition.to(arnold, {x=exit.x})
             transition.to(
-                crate, {time=1000, alpha=0, width=10, height=10,
-                onComplete=function() display.remove(crate) end} )
+                arnold, {time=1000, alpha=0, width=10, height=10,
+                onComplete=function() display.remove(arnold) end} )
         end
 	elseif ( event.phase == "ended" ) then
 		local obj1 = event.object1
