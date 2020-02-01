@@ -3,9 +3,10 @@
 -- level4.lua
 --
 -----------------------------------------------------------------------------------------
-
+--require("mobdebug").start()
 local composer = require( "composer" )
 local utils = require("utils")
+local physics = require ("physics")
 
 local scene = composer.newScene()
 local sceneGroup
@@ -76,7 +77,7 @@ local arnoldMovements = {
 
 local function canArnieKillSomeone()
    --print( "Checking hits" )
-  if(arnold==nill or arnold.x == nil) then
+  if(arnold==nil or arnold.x == nil) then
     return
   end
 
@@ -90,7 +91,7 @@ local function canArnieKillSomeone()
 end
 
 local function arnoldMover(index)
-  if(index > #arnoldMovements or arnold ==nill or arnold.x == nill or gameEnded== true) then
+  if(index > #arnoldMovements or arnold ==nil or arnold.x == nil or gameEnded== true) then
     return
   end
 
@@ -272,6 +273,9 @@ function gameOver()
   timer.cancel(gameLoopTimer)
   timer.cancel(shootLoopTimer)
   timer.cancel(countDownTimer)
+  
+  Runtime:removeEventListener("key", onKeyEvent)
+  Runtime:removeEventListener("collision", onCollision)  
 
   countDownTimer = timer.performWithDelay( 2000, leaveGame, 1 )
 end
@@ -307,6 +311,7 @@ local function onCollision( event )
                 display.remove(bullet)
                 if target.myName == "player" then
                     timer.cancel( gameLoopTimer )
+                    target:pause()
                     display.remove(target)
                     gameOver()
                 elseif(target.myName == "enemy") then
@@ -327,7 +332,7 @@ end
 
 -- Called when a key event has been received
 local function onKeyEvent( event )
-
+    if(gameEnded) then return end
     if event.keyName == "left" then
 		if event.phase == "down" then
 			leftPressed = true
@@ -437,8 +442,7 @@ local function createPlatform (positionX, positionY, typePlatform)
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
  end
--- include Corona's "physics" library
-local physics = require "physics"
+
 
 local function updateTime( event )
     arnieCountdownTime = arnieCountdownTime - 1
@@ -466,7 +470,7 @@ function scene:create( event )
 	-- running until the scene is on the screen.
 	physics.start()
 	physics.setGravity(0, 20)
-	physics.pause()
+	--physics.pause()
 
   --physics.setDrawMode("hybrid") -- shows the physics box around the object
 
