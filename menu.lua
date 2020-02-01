@@ -43,7 +43,6 @@ end
 
 function scene:create( event )
 	local sceneGroup = self.view
-	backgroundTimer = timer.performWithDelay( 80, loadBackground, 0 )
 
 	-- playBtn = display.newImageRect( "Images/Scene/menu/play_button/play_btn_01.png", 300, 300 )
 	playBtn = widget.newButton(
@@ -76,15 +75,16 @@ function scene:show( event )
 
 	if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
- 
+		backgroundTimer = timer.performWithDelay( 80, loadBackground, 0 )
+
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
-               
+
       local prevScene = composer.getSceneName("previous")  -- restart the game if going to the menu
       if(prevScene) then
         composer.removeScene(prevScene)
       end
- 
+
     end
 end
 

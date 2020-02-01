@@ -11,7 +11,9 @@ local physics = require ("physics")
 local scene = composer.newScene()
 local sceneGroup
 
-local arnold, player
+local flames
+local arnold,player
+
 local arnieDefaultCountdownTime = 8
 local arnieCountdownTime
 local countDownTimer
@@ -23,7 +25,8 @@ local angryArnold = false
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
+
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
 local platforms = {}
@@ -50,10 +53,18 @@ local playerSequenceData = {
 local arnoldSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1260, sheetContentHeight= 210 }
 local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", arnoldSheetData)
 
-
 local arnoldSequenceData = {
     {name="running", start=1, count=6, time=575, loopCount=0}
   }
+
+
+local flamesSheetData = {width = 200, height = 300, numFrames = 17, sheetContentWidth = 3400, sheetContentHeight= 300 }
+local flamesSheet1 = graphics.newImageSheet("/Images/Things/flamesAnim.png", flamesSheetData)
+
+local flamesSequenceData = {
+    {name="burning", start=1, count=17, time=1500, loopCount=0}
+  }
+
 
   -- Enemy idle animation
 local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1470, sheetContentHeight= 210 }
@@ -136,7 +147,7 @@ end
 
 local function createExit(imageLocation)
     exit = display.newImageRect(imageLocation, 150, 150)
-    exit.x, exit.y = 1845, 762
+    exit.x, exit.y = 1845, 700
     physics.addBody(exit, "static", { isSensor=true })
     exit.myName = "exit"
 end
@@ -196,7 +207,7 @@ local function shootLoop()
   if(angryArnold) then
     utils.fireAtPlayer(arnold,player)
   end
-  
+
   canArnieKillSomeone()
 end
 
@@ -253,6 +264,7 @@ function leaveGame()
   display.remove(exit)
   display.remove(lever)
   display.remove(winch)
+  display.remove(flames)
 
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
@@ -505,6 +517,13 @@ function scene:create( event )
     winch:addEventListener( "collision" )
 
 
+
+  flames = display.newSprite(flamesSheet1, flamesSequenceData)
+  flames.x, flames.y = 960, 940
+  flames.myName = "flames"
+  flames:setSequence("burning")
+  flames:play()
+
   player = display.newSprite(playerSheet1, playerSequenceData)
   player.x, player.y = 1900, 950
   player.myName = "player"
@@ -545,6 +564,7 @@ function scene:create( event )
 	physics.addBody( grass, "static", { friction=0.3 } )
 
 
+
   --local ground1 = display.newImageRect( "Images/Scene/ground.png", 1200, 41)
 	--ground1.anchorX = 0
 	--ground1.anchorY = 1
@@ -564,6 +584,7 @@ function scene:create( event )
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local ground2Shape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	--physics.addBody( ground2, "static", { friction=0.3 } )
+
 
 
 
@@ -605,7 +626,7 @@ function sendArnie()
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
        print("Arnold is ANGRY///////")
-    end          
+    end
   end
    if(arnold ~= nil) then
     display.remove(arnold)
@@ -644,8 +665,7 @@ function scene:show( event )
       createPlatform (85, 210, "AP"),
       createPlatform (1000, 300, "BP"),
       createPlatform (1750, 270, "B"),
-
-    }
+  }
     leftPressed = false
 	rightPressed = false
     exitIsOpen = false
@@ -658,7 +678,7 @@ function scene:show( event )
     arnieCountdownTime = arnieDefaultCountdownTime
         Runtime:addEventListener( "collision", onCollision )
     physics.start()
-    createEnemy(1000,1100,"enemy")
+    createEnemy(1400,1000,"enemy")
 
 	end
 end
