@@ -373,8 +373,6 @@ local function createPlatform (positionX, positionY, typePlatform)
      platform.anchorY = 0.5
      
    end
-   
-   
    platform.x, platform.y = positionX, positionY
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
@@ -454,12 +452,12 @@ function scene:create( event )
   createExit("Images/Things/gate-closed.png")
 
 	-- add physics to the crate
-  crate:scale(scaleX,scaleY)
+  --crate:scale(scaleX,scaleY)
 
   nw, nh = crate.width*scaleX*1, crate.height*scaleY*0.8
 	physics.addBody(
         crate, "dynamic",
-        { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} },
+        { density=1.0, friction=0.3, bounce=0, shape={-75,-50 , 75,-50 , 75,85 , -75,85} },
         { box={ halfWidth=30, halfHeight=10, x=0, y=95 }, isSensor=true  }
         )
     crate.isFixedRotation = true
