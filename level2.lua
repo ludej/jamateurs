@@ -11,9 +11,11 @@ local scene = composer.newScene()
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed, upPressed
-local crate, entrancePortal, explodingThing
+local crate, entrancePortal, exit, explodingThing
 local playerInContactWith = nil
+local gameLoopTimer
 local explosionSound = audio.loadSound("sound/plop.wav")
+local teleportSound = audio.loadSound("sound/teleport_01.wav")
 local shootingSounds = {
     audio.loadSound("sound/shoot_01.wav"),
     audio.loadSound("sound/shoot_02.wav"),
@@ -99,6 +101,14 @@ local function onCollision( event )
 			(obj1.myName == "explodingThing" and obj2.myName == "player")) then
 			playerInContactWith = explodingThing
 		end
+        if ((obj1.myName == "player" and obj2.myName == "exit") or
+			(obj1.myName == "exit" and obj2.myName == "player")) then
+            timer.cancel( gameLoopTimer )
+            transition.to(crate, {x=exit.x})
+            transition.to(
+                crate, {time=1000, alpha=0, width=10, height=10,
+                onComplete=function() display.remove(crate) end} )
+        end
 	elseif ( event.phase == "ended" ) then
 		local obj1 = event.object1
         local obj2 = event.object2
@@ -144,6 +154,11 @@ function scene:create( event )
     entrancePortal.x, entrancePortal.y = 160, 950
     entrancePortal.alpha = 0
 
+    exit = display.newImageRect("Images/Things/exit.png", 150, 150)
+    exit.x, exit.y = 1500, 950
+    physics.addBody(exit, "static", { isSensor=true })
+	exit.myName = "exit"
+
 	-- make a crate (off-screen), position it, and rotate slightly
 	crate = display.newImageRect( "crate.png", 10, 90 )
 	crate.x, crate.y = 160, 950
@@ -161,7 +176,7 @@ function scene:create( event )
 	grass.x, grass.y = display.screenOriginX, display.actualContentHeight + display.screenOriginY
 
 	explodingThing = display.newImageRect("Images/Things/red-square.png", 90, 90)
-	explodingThing.x, explodingThing.y = 1500, 950
+	explodingThing.x, explodingThing.y = 1000, 950
 	physics.addBody(explodingThing, "static", { isSensor=true })
 	explodingThing.myName = "explodingThing"
 
@@ -172,6 +187,7 @@ function scene:create( event )
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )
     sceneGroup:insert( entrancePortal )
+    sceneGroup:insert( exit )
 	sceneGroup:insert( grass)
 	sceneGroup:insert( crate )
 	sceneGroup:insert( explodingThing )
@@ -185,18 +201,19 @@ function scene:show( event )
 	if phase == "will" then
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
-		-- Called when the scene is now on screen
-		--
-		-- INSERT code here to make the scene come alive
-		-- e.g. start timers, begin animation, play audio, etc.
+		local function teleportIn()
+            timer.pause(gameLoopTimer)
+            transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(teleportSound) end} )
+            transition.to(crate, { time=500, delay=800, alpha=1, width=90, onComplete=function() timer.resume(gameLoopTimer) end} )
+            transition.fadeOut(entrancePortal, { time=300, delay=1400 } )
+        end
+
 		leftPressed = false
 		rightPressed = false
 		Runtime:addEventListener( "key", onKeyEvent )
 		gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
 		Runtime:addEventListener( "collision", onCollision )
-        transition.to(entrancePortal, { time=300, delay=500, alpha=1} )
-        transition.to(crate, { time=500, delay=800, alpha=1, width=90} )
-        transition.to(entrancePortal, { time=300, delay=1400, alpha=0} )
+        teleportIn()
         physics.start()
 	end
 end
