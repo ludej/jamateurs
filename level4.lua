@@ -382,7 +382,8 @@ local function onKeyEvent( event )
     				toggleExit()
                     audio.play(utils.sounds["explosion"])
     			end
-                if playerInContactWith.myName == "enemy" then
+                if playerInContactWith.myName == "deadEnemy" then
+                    print("In contact with enemy for resurrection")
                     resurrectEnemy(playerInContactWith)
                 end
             end
