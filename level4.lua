@@ -15,7 +15,7 @@ local flames
 local arnold
 local caravan
 
-local arnieDefaultCountdownTime = 18
+local arnieDefaultCountdownTime = 30
 local arnieCurrentCountdownTime = arnieDefaultCountdownTime
 local arnieTimeLevelReducer = 4
 local arnieMinimalLevelTime = 16
