@@ -637,7 +637,7 @@ function scene:create( event )
     sceneGroup:insert( caravan )
 	--sceneGroup:insert( explodingThing )
 
-  
+
     countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "MadeinChina", 56)
           countDownSecondsText:setFillColor(0)
           countDownSecondsText.x = 700
@@ -669,7 +669,7 @@ function sendArnie()
     levelCounterText.text=levelCounter
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
-       angryArnold = true       
+       angryArnold = true
     end
   end
    if(arnold ~= nil) then
@@ -722,12 +722,15 @@ function scene:show( event )
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
-    timer.performWithDelay( 30000, spawnPlayer, 1 )
+    timer.performWithDelay( 10000, spawnPlayer, 1 )
     shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
-    arnieCountdownTime = arnieDefaultCountdownTime
+    if levelCounter == 0 then
+        arnieCountdownTime = 2
+    else
+        arnieCountdownTime = arnieDefaultCountdownTime
+    end
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
 
-    arnieCountdownTime = arnieDefaultCountdownTime
         Runtime:addEventListener( "collision", onCollision )
 
     physics.start()
