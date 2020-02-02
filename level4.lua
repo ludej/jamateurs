@@ -29,7 +29,7 @@ local arnoldMoverIndex =0
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, lever2, winch
 
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
@@ -64,6 +64,9 @@ local arnoldSequenceData = {
 
 local caravanSheetData = {width = 460, height = 310, numFrames = 2, sheetContentWidth = 920, sheetContentHeight= 310 }
 local caravanSheet1 = graphics.newImageSheet("/Images/Things/caravan.png", caravanSheetData)
+
+local leverSheetData = {width = 210, height = 210, numFrames = 2, sheetContentWidth = 420, sheetContentHeight= 210 }
+local leverSheet1 = graphics.newImageSheet("/Images/Things/lever.png", caravanSheetData)
 
 local flamesSheetData = {width = 200, height = 300, numFrames = 17, sheetContentWidth = 3400, sheetContentHeight= 300 }
 local flamesSheet1 = graphics.newImageSheet("/Images/Things/flamesAnim.png", flamesSheetData)
@@ -201,9 +204,11 @@ local function toggleExit()
     display.remove(exit)
     if exitIsOpen then
         exitIsOpen = false
+        lever.alpha, lever2.alpha = 1.0, 0
         createExit("Images/Things/gate-closed.png")
     else
         exitIsOpen = true
+        lever.alpha, lever2.alpha = 0, 1.0
         createExit("Images/Things/gate-open.png")
     end
 end
@@ -313,6 +318,7 @@ function leaveGame()
   display.remove(arnold)
   display.remove(exit)
   display.remove(lever)
+  display.remove(lever2)
   display.remove(winch)
   display.remove(flames)
 
@@ -576,14 +582,22 @@ function scene:create( event )
 	-- since we are going to position the background from it's top, left corner, draw the
 	-- background at the real top, left corner.
 
-  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+    lever = display.newImageRect( leverSheet1, 1, 110, 110)
 	lever.anchorX = 0
 	lever.anchorY = 1
-	lever.x, lever.y = 0, 225
+	lever.x, lever.y = -5, 180
     lever.myName = "lever"
 	physics.addBody( lever, "static", { isSensor=true } )
     lever.collision = objectCollide
     lever:addEventListener( "collision" )
+
+    lever2 = display.newImageRect( leverSheet1, 2, 110, 110)
+    lever2.anchorX = 0
+	lever2.anchorY = 1
+	lever2.x, lever2.y = -5, 180
+    lever2.alpha = 0
+
+
 
     winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
     winch.anchorX = 0
