@@ -201,6 +201,7 @@ function scene:create( event )
 	physics.start()
 	physics.setGravity(0, 20)
 	physics.pause()
+  physics.setDrawMode("hybrid")
 
 
 	-- create a grey rectangle as the backdrop
