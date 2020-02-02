@@ -687,12 +687,12 @@ function scene:create( event )
 	--local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	--physics.addBody( grass, "static", { friction=0.3 } )
 
-  local leftWall = display.newLine( 0, 0, 0, display.actualContentHeight )
+  local leftWall = display.newLine( 0, -1080, 0, display.actualContentHeight )
   leftWall.isVisible = false
   leftWall.type = "wall"
   physics.addBody(leftWall, "static",  {filter = {categoryBits = 4, maskBits = 7}})
 
-  local rightWall = display.newLine( display.actualContentWidth, 0, display.actualContentWidth,     display.actualContentHeight )
+  local rightWall = display.newLine( display.actualContentWidth, -1080, display.actualContentWidth,     display.actualContentHeight )
   rightWall.isVisible = false
   rightWall.type = "wall"
   physics.addBody(rightWall, "static",  {filter = {categoryBits = 4, maskBits = 7}})
