@@ -38,7 +38,7 @@ local platformCount = 0
 local enemies = {}
 local enemiesCount = 0
 local gameBackground,gameOverScreen, gameoverBackground
-local countDownSecondsText, countDownText, levelLegendText, levelCounterText
+local countDownSecondsText, levelCounterText
 
 
 local nw, nh
@@ -629,19 +629,16 @@ function scene:create( event )
     sceneGroup:insert( caravan )
 	--sceneGroup:insert( explodingThing )
 
-  countDownText = display.newText(sceneGroup, "Arnie comes in: ", 0,0, "MadeinChina", 56)
-          countDownText.x = display.contentWidth*0.5
-          countDownText.y = 50
+  
     countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "MadeinChina", 56)
-          countDownSecondsText.x = countDownText.x + countDownText.width/2 + 25
-          countDownSecondsText.y = 50
+          countDownSecondsText:setFillColor(0)
+          countDownSecondsText.x = 700
+          countDownSecondsText.y = 110
 
-  levelLegendText = display.newText(sceneGroup, "Level: ", 0,0, "MadeinChina", 56)
-          levelLegendText.x = countDownSecondsText.x + countDownSecondsText.width/2 + 130
-          levelLegendText.y = 50
-    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "MadeinChina", 56)
-          levelCounterText.x = levelLegendText.x + levelLegendText.width/2 + 25
-          levelCounterText.y = 50
+    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "MadeinChina", 66)
+          levelCounterText:setFillColor(0)
+          levelCounterText.x = 1330
+          levelCounterText.y = 110
 end
 
 local function teleportIn()
@@ -663,8 +660,7 @@ function sendArnie()
     levelCounterText.text=levelCounter
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
-       angryArnold = true
-       print("Arnold is ANGRY///////")
+       angryArnold = true       
     end
   end
    if(arnold ~= nil) then
