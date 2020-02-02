@@ -17,6 +17,7 @@ local widget = require "widget"
 local playBtn
 local imgNo = 1
 local backgroundTimer
+local backgroundMusicChannel
 
 local function loadBackground()
 	imgNo = imgNo % 45 + 1
@@ -76,6 +77,8 @@ function scene:show( event )
 	if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
 		backgroundTimer = timer.performWithDelay( 80, loadBackground, 0 )
+		local music = audio.loadStream( "music/liquidator_menu.wav" )
+		backgroundMusicChannel = audio.play( music, { channel=1, loops=-1, fadein=1000 } )
 
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
@@ -93,6 +96,7 @@ function scene:hide( event )
 	local phase = event.phase
 
 	if event.phase == "will" then
+		audio.stop( backgroundMusicChannel )
 		-- Called when the scene is on screen and is about to move off screen
 		--
 		-- INSERT code here to pause the scene

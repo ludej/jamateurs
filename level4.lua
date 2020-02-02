@@ -15,7 +15,14 @@ local flames
 local arnold
 local caravan
 
-local arnieDefaultCountdownTime = 18
+local arnieDefaultCountdownTime = 30
+local arnieCurrentCountdownTime = arnieDefaultCountdownTime
+local arnieTimeLevelReducer = 4
+local arnieMinimalLevelTime = 16
+
+local defaultShootLoopTimer = 1000
+local shootLoopTimerReducer = 100
+local minimalShootLoopTimer = 100
 
 local levelCounter = 0
 local arnieCountdownTime
@@ -39,6 +46,8 @@ local enemies = {}
 local enemiesCount = 0
 local gameBackground,gameOverScreen, gameoverBackground
 local countDownSecondsText, levelCounterText
+
+local music
 
 
 local nw, nh
@@ -124,9 +133,12 @@ local arnoldMovements = {
   }
 
 local enemiesTemplate= {
+
       {x = 1600, y=90},
       {x = 600, y=800},
-      {x = 200, y=430},
+      {x = 150, y=430},
+      {x = 960, y=620},
+      {x = 1600, y=300},
     }
 
 local function canArnieKillSomeone()
@@ -149,11 +161,11 @@ local function arnoldMover()
   if(arnoldMoverIndex > #arnoldMovements or arnold ==nil or arnold.x == nil or gameEnded== true) then
     return
   end
-  
+
   if(arnold.isPlaying) then
     arnold:pause()
   end
-  
+
   if(arnoldMovements[arnoldMoverIndex].action == "move") then
     arnold:setSequence("run")
     arnold:play()
@@ -188,7 +200,7 @@ local function arnoldMover()
       arnold:play()
       print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
       timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
-      
+
     end
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
@@ -219,6 +231,7 @@ local function createExit(imageLocation)
 end
 
 local function toggleExit()
+    audio.play(utils.sounds["door"])
     display.remove(exit)
     if exitIsOpen then
         exitIsOpen = false
@@ -325,6 +338,7 @@ function createEnemy(xPosition, yPosition, type, index)
 
 local function enemyHit(enemy)
   local x,y = enemy.x,enemy.y
+  audio.play(utils.sounds["enemyDeath"])
   createEnemy(x,y,"deadEnemy", enemy.enemyIndex)
 end
 
@@ -361,6 +375,7 @@ function leaveGame()
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
   sceneGroup:removeSelf()
+  audio.stop()
   composer.gotoScene("menu", "slideRight")
 end
 
@@ -406,6 +421,8 @@ local function onCollision( event )
                 transition.to(
                     arnold, {time=1000, alpha=0, width=10, height=10,
                     onComplete=function() display.remove(arnold) end} )
+                audio.stop()
+                music = audio.play( utils.sounds["musicPlayer"], { channel=1, loops=-1, fadein=1000 } )
             end
         end
         if (obj1.myName == "bullet" or obj2.myName == "bullet") then
@@ -416,13 +433,12 @@ local function onCollision( event )
                 bullet, target = obj2, obj1
             end
             if target.myName ~= "arnold" then
-                --bullet:pause()
                 display.remove(bullet)
                 if target.myName == "player" then
-                    timer.cancel( gameLoopTimer )
-                    target:pause()
-                    display.remove(target)
-                    gameOver()
+                      timer.cancel( gameLoopTimer )
+                      target:pause()
+                      display.remove(target)
+                      gameOver()
                 elseif(target.myName == "enemy") then
                   enemyHit(target)
                 end
@@ -476,7 +492,6 @@ local function onKeyEvent( event )
             if playerInContactWith then
     			if playerInContactWith.myName == "lever" then
     				toggleExit()
-                    audio.play(utils.sounds["explosion"])
     			elseif playerInContactWith.myName == "deadEnemy" then
                     resurrectEnemy(playerInContactWith)
                     playerInContactWith=nil
@@ -593,7 +608,21 @@ local function updateTime( event )
 
     if(arnieCountdownTime == 0) then
         sendArnie()
-        arnieCountdownTime = arnieDefaultCountdownTime
+        
+        arnieCurrentCountdownTime = arnieDefaultCountdownTime - ((levelCounter -1) * arnieTimeLevelReducer)   
+        print("Current level "..levelCounter)
+        print("CountdownTime "..arnieCurrentCountdownTime)
+        if(arnieCurrentCountdownTime< arnieMinimalLevelTime)then
+          arnieCountdownTime = arnieMinimalLevelTime
+          shootLoopTime = defaultShootLoopTimer  - ((levelCounter -1) * shootLoopTimerReducer )
+           if(shootLoopTime>= minimalShootLoopTimer) then
+             timer.cancel(shootLoopTimer)         
+              shootLoopTimer = timer.performWithDelay( shootLoopTime, shootLoop, 0 )
+             end          
+        else
+          arnieCountdownTime = arnieCurrentCountdownTime         
+        end      
+        
         countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
     end
 end
@@ -687,12 +716,12 @@ function scene:create( event )
 	--local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	--physics.addBody( grass, "static", { friction=0.3 } )
 
-  local leftWall = display.newLine( 0, 0, 0, display.actualContentHeight )
+  local leftWall = display.newLine( 0, -1080, 0, display.actualContentHeight )
   leftWall.isVisible = false
   leftWall.type = "wall"
   physics.addBody(leftWall, "static",  {filter = {categoryBits = 4, maskBits = 7}})
 
-  local rightWall = display.newLine( display.actualContentWidth, 0, display.actualContentWidth,     display.actualContentHeight )
+  local rightWall = display.newLine( display.actualContentWidth, -1080, display.actualContentWidth,     display.actualContentHeight )
   rightWall.isVisible = false
   rightWall.type = "wall"
   physics.addBody(rightWall, "static",  {filter = {categoryBits = 4, maskBits = 7}})
@@ -725,7 +754,7 @@ function scene:create( event )
 end
 
 local function teleportIn()
-  transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
+  transition.fadeIn(entrancePortal, { time=300, delay=500 } )
   transition.fadeIn(arnold, {
     time=500, delay=800, onComplete=function()
     arnold:setSequence("idle")
@@ -748,6 +777,7 @@ function sendArnie()
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
     end
+    
   end
    if(arnold ~= nil) then
     display.remove(arnold)
@@ -759,6 +789,9 @@ function sendArnie()
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
   arnold.alpha = 0
   arnold.myName = "arnold"
+
+  audio.stop()
+  music = audio.play( utils.sounds["musicArnold"], { channel=1, loops=-1} )
 
   physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
   arnold.isFixedRotation = true
@@ -774,10 +807,12 @@ function scene:show( event )
 	sceneGroup = self.view
 	local phase = event.phase
 
-  gameBackground = display.newImageRect(sceneGroup, "Images/Scene/background/bg_all.png",1920, 1080)
-  gameBackground.x = display.contentWidth*0.5
-  gameBackground.y = display.contentHeight*0.5
-  gameBackground:toBack()
+    gameBackground = display.newImageRect(sceneGroup, "Images/Scene/background/bg_all.png",1920, 1080)
+    gameBackground.x = display.contentWidth*0.5
+    gameBackground.y = display.contentHeight*0.5
+    gameBackground:toBack()
+
+    music = audio.play( utils.sounds["musicPlayer"], { channel=1, loops=-1, fadein=1000 } )
 
 	if phase == "will" then
 		-- Called when the scene is still off screen and is about to move on screen
@@ -800,7 +835,7 @@ function scene:show( event )
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
     timer.performWithDelay( 1000, spawnPlayer, 1 )
-    shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
+    shootLoopTimer = timer.performWithDelay( defaultShootLoopTimer, shootLoop, 0 )
     if levelCounter == 0 then
         arnieCountdownTime = 2
     else
