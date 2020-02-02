@@ -164,7 +164,6 @@ local function arnoldMover()
       arnoldMover(arnoldMoverIndex)
   elseif(arnoldMovements[arnoldMoverIndex].action == "shoot") then
       for i=1,arnoldMovements[arnoldMoverIndex].actionData do
-
         utils.fire(arnold)
       end
       print("Arnold movement, type  shoot. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
@@ -175,8 +174,7 @@ local function arnoldMover()
       arnoldMover(arnoldMoverIndex)
     elseif(arnoldMovements[arnoldMoverIndex].action == "idle") then
       print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
-      --timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
-
+      timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
     end
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
