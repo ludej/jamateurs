@@ -175,7 +175,7 @@ local function arnoldMover()
       arnoldMover(arnoldMoverIndex)
     elseif(arnoldMovements[arnoldMoverIndex].action == "idle") then
       print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
-      timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
+      --timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
 
     end
   --ArnoldMovement(index+1)
@@ -709,7 +709,9 @@ function sendArnie()
     angryArnold = false
     arnoldMoverIndex =0
     levelCounter = levelCounter + 1
-    createEnemy(enemiesTemplate[levelCounter].x , enemiesTemplate[levelCounter].y, "enemy", -1)
+    if (levelCounter <= #enemiesTemplate) then
+      createEnemy(enemiesTemplate[levelCounter].x , enemiesTemplate[levelCounter].y, "enemy", -1)
+    end
     levelCounterText.text=levelCounter
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
