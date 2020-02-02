@@ -790,7 +790,7 @@ function scene:show( event )
     gameBackground.y = display.contentHeight*0.5
     gameBackground:toBack()
 
-    music = audio.play( utils.sounds["musicPlayer"], { channel=1, loops=-1, fadein=1000 } )
+    --music = audio.play( utils.sounds["musicPlayer"], { channel=1, loops=-1, fadein=1000 } )
 
 	if phase == "will" then
 		-- Called when the scene is still off screen and is about to move on screen
