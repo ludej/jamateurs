@@ -480,10 +480,10 @@ local function onKeyEvent( event )
             if player.sensorOverlaps > 0 then
                 -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
                 canDoubleJump = true
-                player:setLinearVelocity(0, -450)
+                player:setLinearVelocity(0, -800)
             elseif canDoubleJump then
                 canDoubleJump = false
-                player:setLinearVelocity(0, -450)
+                player:setLinearVelocity(0, -800)
             end
         end
 	end
@@ -583,6 +583,7 @@ local function spawnPlayer()
       { density=1.0, friction=0.3, bounce=0, shape={-75,-50 , 75,-50 , 75,85 , -75,85} },
       { box={ halfWidth=30, halfHeight=10, x=0, y=95 }, isSensor=true  }
       )
+    player.gravityScale = 3.5
     player.isFixedRotation = true
     player.sensorOverlaps = 0
     player.collision = sensorCollide
