@@ -175,7 +175,7 @@ local function arnoldMover()
       arnold.xScale = -1
     end
 
-    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[arnoldMoverIndex].actionData, onComplete = function() arnoldMover() end })    
+    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[arnoldMoverIndex].actionData, onComplete = function() arnoldMover() end })
     print("Arnold movement, type  move. Delta : ", arnoldMovements[arnoldMoverIndex].actionData)
   elseif(arnoldMovements[arnoldMoverIndex].action == "jump") then
       arnold:setSequence("jump")
@@ -200,7 +200,7 @@ local function arnoldMover()
       print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
       timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
 
-    end 
+    end
 end
 
 local function sensorCollide( self, event )
@@ -624,13 +624,13 @@ end
 function scene:create( event )
 
 	-- Called when the scene's view does not exist.
-	
+
 	local sceneGroup = self.view
   levelCounter = 0
 
 	physics.start()
 	physics.setGravity(0, 20)
-	
+
 
  -- physics.setDrawMode("hybrid") -- shows the physics box around the object
 
@@ -690,7 +690,7 @@ function scene:create( event )
   entrancePortal:play()
 
 
-  createExit("Images/Things/gate-closed.png")	
+  createExit("Images/Things/gate-closed.png")
 
   local leftWall = display.newLine( 0, -1080, 0, display.actualContentHeight )
   leftWall.isVisible = false
@@ -715,7 +715,7 @@ function scene:create( event )
     sceneGroup:insert( lever )
     sceneGroup:insert( lever2 )
     sceneGroup:insert( flames )
-    
+
     countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "Grandstander", 40)
           countDownSecondsText:setFillColor(0)
           countDownSecondsText.x = 700
@@ -809,7 +809,7 @@ function scene:show( event )
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
-    timer.performWithDelay( 15000, spawnPlayer, 1 )
+    timer.performWithDelay( 5000, spawnPlayer, 1 )
     shootLoopTimer = timer.performWithDelay( defaultShootLoopTimer, shootLoop, 0 )
     if levelCounter == 0 then
         arnieCountdownTime = 2

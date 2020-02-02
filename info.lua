@@ -44,7 +44,7 @@ function scene:show( event )
 		--
 		-- INSERT code here to make the scene come alive
 
-        timer.performWithDelay( 5000, leave, 1 )
+        timer.performWithDelay( 8000, leave, 1 )
 
 	end
 end
