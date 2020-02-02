@@ -245,6 +245,7 @@ end
 local function breakCrate()
     crate[1].alpha = 0
     crate[2].alpha = 1.0
+    audio.play(utils.sounds["crate"])
 end
 
 local function fixCrate()
@@ -316,6 +317,7 @@ function createEnemy(xPosition, yPosition, type, index)
     enemies[index]= display.newSprite(enemyIdleSheet, enemyIdleSequenceData)
     enemies[index]:setSequence("idle")
     enemies[index]:play()
+    audio.play(utils.sounds["enemyAlive"])
     timer.performWithDelay(1, function() physics.addBody( enemies[index], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } ) end, 1)
   elseif(type == "deadEnemy") then
       display.remove(enemies[index])
