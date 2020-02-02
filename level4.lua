@@ -324,7 +324,7 @@ function createEnemy(xPosition, yPosition, type, index)
   end
 
 local function enemyHit(enemy)
-  local x,y = enemy.x,enemy.y  
+  local x,y = enemy.x,enemy.y
   createEnemy(x,y,"deadEnemy", enemy.enemyIndex)
 end
 
@@ -463,10 +463,10 @@ local function onKeyEvent( event )
             if player.sensorOverlaps > 0 then
                 -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
                 canDoubleJump = true
-                player:setLinearVelocity(0, -500)
+                player:setLinearVelocity(0, -450)
             elseif canDoubleJump then
                 canDoubleJump = false
-                player:setLinearVelocity(0, -500)
+                player:setLinearVelocity(0, -450)
             end
         end
 	end
