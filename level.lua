@@ -380,6 +380,8 @@ function leaveGame()
 end
 
 function gameOver()
+  audio.stop()
+  audio.play(utils.sounds["gameOver"])
   gameEnded = true
   gameoverBackground = display.newRect( 0, 0 , display.contentWidth* 1.25, display.contentHeight * 1.25)
   gameoverBackground.x =display.contentWidth*0.5
@@ -401,7 +403,7 @@ function gameOver()
   Runtime:removeEventListener("key", onKeyEvent)
   Runtime:removeEventListener("collision", onCollision)
 
-  countDownTimer = timer.performWithDelay( 2000, leaveGame, 1 )
+  countDownTimer = timer.performWithDelay( 3000, leaveGame, 1 )
 end
 
 local function onCollision( event )
