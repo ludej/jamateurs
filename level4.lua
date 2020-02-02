@@ -29,7 +29,7 @@ local arnoldMoverIndex =0
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, lever2, winch, crate
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, lever2, crate
 
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
@@ -335,7 +335,6 @@ function leaveGame()
   display.remove(exit)
   display.remove(lever)
   display.remove(lever2)
-  display.remove(winch)
   display.remove(flames)
   display.remove(crate[1])
   display.remove(crate[2])
@@ -628,16 +627,6 @@ function scene:create( event )
     crate[1].collision = objectCollide
     crate[1]:addEventListener( "collision" )
     crate[2].alpha = 0
-
-
-    winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-    winch.anchorX = 0
-    winch.anchorY = 1
-    winch.x, winch.y = 750, 880
-    physics.addBody( winch, "static", { isSensor=true } )
-    winch.myName = "winch"
-    winch.collision = objectCollide
-    winch:addEventListener( "collision" )
 
     caravan = display.newImageRect(caravanSheet1, 1, 405, 310)
     caravan.x, caravan.y = 1700, 900
