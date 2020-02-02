@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------------------
 --
--- level4.lua
+-- level.lua
 --
 -----------------------------------------------------------------------------------------
 --require("mobdebug").start()
@@ -175,8 +175,7 @@ local function arnoldMover()
       arnold.xScale = -1
     end
 
-    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[arnoldMoverIndex].actionData, onComplete = function() arnoldMover() end })
-    --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
+    transition.to(arnold, {time=1000, x=arnold.x + arnoldMovements[arnoldMoverIndex].actionData, onComplete = function() arnoldMover() end })    
     print("Arnold movement, type  move. Delta : ", arnoldMovements[arnoldMoverIndex].actionData)
   elseif(arnoldMovements[arnoldMoverIndex].action == "jump") then
       arnold:setSequence("jump")
@@ -201,9 +200,7 @@ local function arnoldMover()
       print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
       timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
 
-    end
-  --ArnoldMovement(index+1)
-  --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
+    end 
 end
 
 local function sensorCollide( self, event )
@@ -415,7 +412,6 @@ local function onCollision( event )
 		end
         if ((obj1.myName == "arnold" and obj2.myName == "exit") or
 			(obj1.myName == "exit" and obj2.myName == "arnold")) then
-            -- timer.cancel( gameLoopTimer )
             if exitIsOpen then
                 transition.to(arnold, {x=exit.x})
                 transition.to(
@@ -501,8 +497,6 @@ local function onKeyEvent( event )
             end
 		end
 	end
-    -- IMPORTANT! Return false to indicate that this app is NOT overriding the received key
-    -- This lets the operating system execute its default handling of the key
     return false
 end
 
@@ -568,8 +562,6 @@ local function createPlatform (positionX, positionY, typePlatform)
    platform.x, platform.y = positionX, positionY
   platforms[platformCount]= platform
   sceneGroup:insert( platform )
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
  end
 
 
@@ -632,18 +624,13 @@ end
 function scene:create( event )
 
 	-- Called when the scene's view does not exist.
-	--
-	-- INSERT code here to initialize the scene
-	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
-
+	
 	local sceneGroup = self.view
   levelCounter = 0
 
-	-- We need physics started to add bodies, but we don't want the simulaton
-	-- running until the scene is on the screen.
 	physics.start()
 	physics.setGravity(0, 20)
-	--physics.pause()
+	
 
  -- physics.setDrawMode("hybrid") -- shows the physics box around the object
 
@@ -703,18 +690,7 @@ function scene:create( event )
   entrancePortal:play()
 
 
-  createExit("Images/Things/gate-closed.png")
-
-	-- create a grass object and add physics (with custom shape)
-	--local grass = display.newImageRect( "grass.png", screenW, 82)
-	--grass.anchorX = 0
-	--grass.anchorY = 0
-	--  draw the grass at the very bottom of the screen
-	--grass.x, grass.y = display.screenOriginX, display.actualContentHeight + display.screenOriginY
-
-	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	--local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	--physics.addBody( grass, "static", { friction=0.3 } )
+  createExit("Images/Things/gate-closed.png")	
 
   local leftWall = display.newLine( 0, -1080, 0, display.actualContentHeight )
   leftWall.isVisible = false
@@ -726,22 +702,20 @@ function scene:create( event )
   rightWall.type = "wall"
   physics.addBody(rightWall, "static",  {filter = {categoryBits = 4, maskBits = 7}})
 
-    --sendArnie()
+
 
 
 
     sceneGroup:insert( entrancePortal )
     sceneGroup:insert( exit )
-  --sceneGroup:insert( grass)
+
     sceneGroup:insert( caravan )
     sceneGroup:insert( crate[1] )
     sceneGroup:insert( crate[2] )
     sceneGroup:insert( lever )
     sceneGroup:insert( lever2 )
     sceneGroup:insert( flames )
-	--sceneGroup:insert( explodingThing )
-
-
+    
     countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "Grandstander", 40)
           countDownSecondsText:setFillColor(0)
           countDownSecondsText.x = 700
@@ -857,8 +831,7 @@ function scene:hide( event )
 	if event.phase == "will" then
 		-- Called when the scene is on screen and is about to move off screen
 		--
-		-- INSERT code here to pause the scene
-		-- e.g. stop timers, stop animation, unload sounds, etc.)
+
 		physics.stop()
 	elseif phase == "did" then
 		-- Called when the scene is now off screen
@@ -873,8 +846,6 @@ function scene:destroy( event )
 
 	-- Called prior to the removal of scene's "view" (sceneGroup)
 	--
-	-- INSERT code here to cleanup the scene
-	-- e.g. remove display objects, remove touch listeners, save state, etc.
 	local sceneGroup = self.view
 
 	package.loaded[physics] = nil
