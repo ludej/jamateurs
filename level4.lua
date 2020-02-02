@@ -15,7 +15,7 @@ local sceneGroup
 local flames
 local arnold
 
-local arnieDefaultCountdownTime = 15
+local arnieDefaultCountdownTime = 18
 local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
@@ -92,18 +92,22 @@ local arnoldMovements = {
     {action = "move", actionData = 250},
     {action = "idle", actionData = 500},
     {action = "jump", actionData = -600},
-    {action = "move", actionData = -400},
+    {action = "move", actionData = -380},
     {action = "idle", actionData = 500},
     {action = "jump", actionData = -600},
-    {action = "move", actionData = -270},
+    {action = "move", actionData = -250},
     {action = "idle", actionData = 500},
     {action = "move", actionData = 400},
     {action = "idle", actionData = 800},
     {action = "jump", actionData = -500},
     {action = "move", actionData = 500},
+    {action = "idle", actionData = 800},
+    {action = "jump", actionData = -400},
+    {action = "idle", actionData = 800},
     {action = "move", actionData = 320},
     {action = "idle", actionData = 800},
     {action = "move", actionData = 300},
+    {action = "move", actionData = 220},
   }
 
 local function canArnieKillSomeone()
@@ -178,7 +182,7 @@ end
 
 local function createExit(imageLocation)
     exit = display.newImageRect(imageLocation, 150, 150)
-    exit.x, exit.y = 1845, 670
+    exit.x, exit.y = 1818, 670
     physics.addBody(exit, "static", { isSensor=true })
     exit.myName = "exit"
 end
@@ -562,7 +566,7 @@ function scene:create( event )
   flames:play()
   physics.addBody( flames, "static", { friction=0.3, shape ={-70,-90 , 70,-90 , 70,150 , -70,150} })
   player = display.newSprite(playerSheet1, playerSequenceData)
-  player.x, player.y = 1900, 950
+  player.x, player.y = 1820, 950
   player.myName = "player"
   player:setSequence("idle")
   player:play()
