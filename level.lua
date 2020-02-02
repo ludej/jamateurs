@@ -481,9 +481,11 @@ local function onKeyEvent( event )
                 -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
                 canDoubleJump = true
                 player:setLinearVelocity(0, -800)
+                audio.play(utils.sounds["jumpHero"])
             elseif canDoubleJump then
                 canDoubleJump = false
                 player:setLinearVelocity(0, -800)
+                audio.play(utils.sounds["jumpHero"])
             end
         end
 	end
@@ -689,7 +691,7 @@ function scene:create( event )
   physics.addBody( flames, "static", { friction=0.3, shape ={-70,-90 , 70,-90 , 70,150 , -70,150} })
 
   entrancePortal = display.newSprite(entrancePortalSheet1,entrancePortalSequenceData)
-  entrancePortal.x, entrancePortal.y = 160, 781
+  entrancePortal.x, entrancePortal.y = 160, 890
   entrancePortal.alpha = 0
   entrancePortal.myName = "portal"
   entrancePortal:setSequence("beaming")
