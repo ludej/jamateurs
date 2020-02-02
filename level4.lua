@@ -681,12 +681,12 @@ function scene:create( event )
 	--sceneGroup:insert( explodingThing )
 
 
-    countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "MadeinChina", 40)
+    countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "Grandstander", 40)
           countDownSecondsText:setFillColor(0)
           countDownSecondsText.x = 700
           countDownSecondsText.y = 110
 
-    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "MadeinChina", 40)
+    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "Grandstander", 40)
           levelCounterText:setFillColor(0)
           levelCounterText.x = 1330
           levelCounterText.y = 110
