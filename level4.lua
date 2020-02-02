@@ -47,7 +47,7 @@ local scaleX,scaleY = 0.5,0.5
 
 -- Character movement animation
 local playerSheetData = {width = 210, height = 210, numFrames = 10, sheetContentWidth = 2100, sheetContentHeight= 210 }
-local playerSheet1 = graphics.newImageSheet("/Images/Character/heroAnim.png", playerSheetData)
+local playerSheet1 = graphics.newImageSheet("Images/Character/heroAnim.png", playerSheetData)
 
 local playerSequenceData = {
     {name="idle", start=1, count=4, time=800, loopCount=0},
@@ -56,30 +56,30 @@ local playerSequenceData = {
 
 -- Arnold movement animation
 local arnoldSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1260, sheetContentHeight= 210 }
-local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", arnoldSheetData)
+local arnoldSheet1 = graphics.newImageSheet("Images/Character/arnieRun.png", arnoldSheetData)
 
 local arnoldSequenceData = {
     {name="running", start=1, count=6, time=575, loopCount=0}
   }
 
 local caravanSheetData = {width = 460, height = 310, numFrames = 2, sheetContentWidth = 920, sheetContentHeight= 310 }
-local caravanSheet1 = graphics.newImageSheet("/Images/Things/caravan.png", caravanSheetData)
+local caravanSheet1 = graphics.newImageSheet("Images/Things/caravan.png", caravanSheetData)
 
 local leverSheetData = {width = 210, height = 210, numFrames = 2, sheetContentWidth = 420, sheetContentHeight= 210 }
-local leverSheet1 = graphics.newImageSheet("/Images/Things/lever.png", caravanSheetData)
+local leverSheet1 = graphics.newImageSheet("Images/Things/lever.png", caravanSheetData)
 
 local crateSheetData = {width = 210, height = 210, numFrames = 2, sheetContentWidth = 420, sheetContentHeight= 210 }
-local crateSheet1 = graphics.newImageSheet("/Images/Things/crate.png", crateSheetData)
+local crateSheet1 = graphics.newImageSheet("Images/Things/crate.png", crateSheetData)
 
 local flamesSheetData = {width = 200, height = 300, numFrames = 17, sheetContentWidth = 3400, sheetContentHeight= 300 }
-local flamesSheet1 = graphics.newImageSheet("/Images/Things/flamesAnim.png", flamesSheetData)
+local flamesSheet1 = graphics.newImageSheet("Images/Things/flamesAnim.png", flamesSheetData)
 
 local flamesSequenceData = {
     {name="burning", start=1, count=17, time=1500, loopCount=0}
   }
 
 local entrancePortalSheetData = {width = 300, height = 300, numFrames = 12, sheetContentWidth = 3600, sheetContentHeight= 300 }
-local entrancePortalSheet1 = graphics.newImageSheet("/Images/Things/portalAnim.png", entrancePortalSheetData)
+local entrancePortalSheet1 = graphics.newImageSheet("Images/Things/portalAnim.png", entrancePortalSheetData)
 
 local entrancePortalSequenceData = {
     {name="beaming", start=1, count=12, time=1300, loopCount=0}
@@ -87,7 +87,7 @@ local entrancePortalSequenceData = {
 
   -- Enemy idle animation
 local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1470, sheetContentHeight= 210 }
-local enemyIdleSheet = graphics.newImageSheet("/Images/Character/enemyIdle.png", enemyIdleSheetData)
+local enemyIdleSheet = graphics.newImageSheet("Images/Character/enemyIdle.png", enemyIdleSheetData)
 
 
 local enemyIdleSequenceData = {
