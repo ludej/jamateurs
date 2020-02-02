@@ -347,13 +347,17 @@ end
 function gameOver()
   gameEnded = true
   gameoverBackground = display.newRect( 0, 0 , display.contentWidth* 1.25, display.contentHeight * 1.25)
-      gameoverBackground.x =display.contentWidth*0.5
-      gameoverBackground.y = display.contentHeight*0.5
-      gameoverBackground:setFillColor(0)
-      gameoverBackground.alpha = 0.7
+  gameoverBackground.x =display.contentWidth*0.5
+  gameoverBackground.y = display.contentHeight*0.5
+  gameoverBackground:setFillColor(0)
+  gameoverBackground.alpha = 0.7
   gameOverScreen = display.newImageRect( "Images/Scene/UI/hasta/hasta_001.png",1920, 1080)
   gameOverScreen.x = display.contentWidth*0.5
   gameOverScreen.y = display.contentHeight*0.5
+  sceneGroup:insert( gameoverBackground )
+  sceneGroup:insert( gameOverScreen )
+  gameoverBackground:toFront()
+  gameOverScreen:toFront()
 
   timer.cancel(gameLoopTimer)
   timer.cancel(shootLoopTimer)
@@ -528,6 +532,7 @@ local function createPlatform (positionX, positionY, typePlatform)
    end
    platform.x, platform.y = positionX, positionY
   platforms[platformCount]= platform
+  sceneGroup:insert( platform )
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
  end
@@ -669,6 +674,11 @@ function scene:create( event )
     sceneGroup:insert( exit )
 	sceneGroup:insert( grass)
     sceneGroup:insert( caravan )
+    sceneGroup:insert( crate[1] )
+    sceneGroup:insert( crate[2] )
+    sceneGroup:insert( lever )
+    sceneGroup:insert( lever2 )
+    sceneGroup:insert( flames )
 	--sceneGroup:insert( explodingThing )
 
 
@@ -721,6 +731,7 @@ function sendArnie()
 
   physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
   arnold.isFixedRotation = true
+  sceneGroup:insert(arnold)
 
 
   teleportIn()
