@@ -270,11 +270,13 @@ local function gameLoop()
 end
 
 local function shootLoop()
-  if(angryArnold) then
-    utils.fireAtPlayer(arnold,player)
-  end
-
-  canArnieKillSomeone()
+    -- CHeck if Arnold exists and is fully spawned, before he can fire
+    if arnold and arnold.alpha == 1 then
+        if(angryArnold) then
+            utils.fireAtPlayer(arnold,player)
+        end
+        canArnieKillSomeone()
+    end
 end
 
 function createEnemy(xPosition, yPosition, type, index)
@@ -456,7 +458,7 @@ local function onKeyEvent( event )
                     resurrectEnemy(playerInContactWith)
                     playerInContactWith=nil
                 elseif playerInContactWith.myName == "crate" then
-                    fixCrate()                    
+                    fixCrate()
                 end
             end
 		end
