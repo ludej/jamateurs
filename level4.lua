@@ -209,7 +209,7 @@ local function objectCollide(self, event)
             playerInContactWith = self
         elseif event.other.myName == "arnold" then
             arnoldInContactWith = self
-            if self.myName == "switch" then
+            if self.myName == "lever" then
                 toggleExit()
             end
         end
