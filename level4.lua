@@ -132,11 +132,11 @@ local function canArnieKillSomeone()
     return
   end
 
-  local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + 1000, arnold.y, "closest" )
+  local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + (arnold.xScale * 1000), arnold.y, "closest" )
   if ( hits ) then
 
     if (hits[1].object.myName == "player" or hits[1].object.myName == "enemy") then
-    utils.fire(arnold)
+        utils.fire(arnold)
     end
   end
 end
@@ -766,7 +766,7 @@ function scene:show( event )
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
-    timer.performWithDelay( 3000, spawnPlayer, 1 )
+    timer.performWithDelay( 1000, spawnPlayer, 1 )
     shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     if levelCounter == 0 then
         arnieCountdownTime = 2
