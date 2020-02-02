@@ -228,6 +228,7 @@ local function createExit(imageLocation)
 end
 
 local function toggleExit()
+    audio.play(utils.sounds["door"])
     display.remove(exit)
     if exitIsOpen then
         exitIsOpen = false
@@ -334,6 +335,7 @@ function createEnemy(xPosition, yPosition, type, index)
 
 local function enemyHit(enemy)
   local x,y = enemy.x,enemy.y
+  audio.play(utils.sounds["enemyDeath"])
   createEnemy(x,y,"deadEnemy", enemy.enemyIndex)
 end
 
@@ -487,7 +489,6 @@ local function onKeyEvent( event )
             if playerInContactWith then
     			if playerInContactWith.myName == "lever" then
     				toggleExit()
-                    audio.play(utils.sounds["explosion"])
     			elseif playerInContactWith.myName == "deadEnemy" then
                     resurrectEnemy(playerInContactWith)
                     playerInContactWith=nil
@@ -750,7 +751,7 @@ function scene:create( event )
 end
 
 local function teleportIn()
-  transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
+  transition.fadeIn(entrancePortal, { time=300, delay=500 } )
   transition.fadeIn(arnold, {
     time=500, delay=800, onComplete=function()
     arnold:setSequence("idle")
