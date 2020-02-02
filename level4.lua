@@ -181,7 +181,7 @@ local function arnoldMover()
   elseif(arnoldMovements[arnoldMoverIndex].action == "jump") then
       arnold:setSequence("jump")
       arnold:play()
-      audio.play( utils.sounds["jump"] )
+      audio.play( utils.sounds["jumpArnold"] )
       arnold:setLinearVelocity( 0, arnoldMovements[arnoldMoverIndex].actionData )
       print("Arnold movement, type  jump. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
       arnoldMover()
@@ -608,21 +608,21 @@ local function updateTime( event )
 
     if(arnieCountdownTime == 0) then
         sendArnie()
-        
-        arnieCurrentCountdownTime = arnieDefaultCountdownTime - ((levelCounter -1) * arnieTimeLevelReducer)   
+
+        arnieCurrentCountdownTime = arnieDefaultCountdownTime - ((levelCounter -1) * arnieTimeLevelReducer)
         print("Current level "..levelCounter)
         print("CountdownTime "..arnieCurrentCountdownTime)
         if(arnieCurrentCountdownTime< arnieMinimalLevelTime)then
           arnieCountdownTime = arnieMinimalLevelTime
           shootLoopTime = defaultShootLoopTimer  - ((levelCounter -1) * shootLoopTimerReducer )
            if(shootLoopTime>= minimalShootLoopTimer) then
-             timer.cancel(shootLoopTimer)         
+             timer.cancel(shootLoopTimer)
               shootLoopTimer = timer.performWithDelay( shootLoopTime, shootLoop, 0 )
-             end          
+             end
         else
-          arnieCountdownTime = arnieCurrentCountdownTime         
-        end      
-        
+          arnieCountdownTime = arnieCurrentCountdownTime
+        end
+
         countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
     end
 end
@@ -777,7 +777,7 @@ function sendArnie()
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
     end
-    
+
   end
    if(arnold ~= nil) then
     display.remove(arnold)
@@ -834,7 +834,7 @@ function scene:show( event )
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
-    timer.performWithDelay( 1000, spawnPlayer, 1 )
+    timer.performWithDelay( 15000, spawnPlayer, 1 )
     shootLoopTimer = timer.performWithDelay( defaultShootLoopTimer, shootLoop, 0 )
     if levelCounter == 0 then
         arnieCountdownTime = 2
