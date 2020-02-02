@@ -776,6 +776,7 @@ function sendArnie()
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
+       audio.play( utils.sounds["anrie_tot"] )
     end
     
   end
