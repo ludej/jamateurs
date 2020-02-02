@@ -29,7 +29,7 @@ local arnoldMoverIndex =0
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, lever2, winch, crate
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, lever2, crate
 
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
@@ -343,7 +343,6 @@ function leaveGame()
   display.remove(exit)
   display.remove(lever)
   display.remove(lever2)
-  display.remove(winch)
   display.remove(flames)
   display.remove(crate[1])
   display.remove(crate[2])
@@ -356,13 +355,17 @@ end
 function gameOver()
   gameEnded = true
   gameoverBackground = display.newRect( 0, 0 , display.contentWidth* 1.25, display.contentHeight * 1.25)
-      gameoverBackground.x =display.contentWidth*0.5
-      gameoverBackground.y = display.contentHeight*0.5
-      gameoverBackground:setFillColor(0)
-      gameoverBackground.alpha = 0.7
+  gameoverBackground.x =display.contentWidth*0.5
+  gameoverBackground.y = display.contentHeight*0.5
+  gameoverBackground:setFillColor(0)
+  gameoverBackground.alpha = 0.7
   gameOverScreen = display.newImageRect( "Images/Scene/UI/hasta/hasta_001.png",1920, 1080)
   gameOverScreen.x = display.contentWidth*0.5
   gameOverScreen.y = display.contentHeight*0.5
+  sceneGroup:insert( gameoverBackground )
+  sceneGroup:insert( gameOverScreen )
+  gameoverBackground:toFront()
+  gameOverScreen:toFront()
 
   timer.cancel(gameLoopTimer)
   timer.cancel(shootLoopTimer)
@@ -537,6 +540,7 @@ local function createPlatform (positionX, positionY, typePlatform)
    end
    platform.x, platform.y = positionX, positionY
   platforms[platformCount]= platform
+  sceneGroup:insert( platform )
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local platformShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
  end
@@ -639,16 +643,6 @@ function scene:create( event )
     crate[1]:addEventListener( "collision" )
     crate[2].alpha = 0
 
-
-    winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
-    winch.anchorX = 0
-    winch.anchorY = 1
-    winch.x, winch.y = 750, 880
-    physics.addBody( winch, "static", { isSensor=true } )
-    winch.myName = "winch"
-    winch.collision = objectCollide
-    winch:addEventListener( "collision" )
-
     caravan = display.newImageRect(caravanSheet1, 1, 405, 310)
     caravan.x, caravan.y = 1650, 900
 
@@ -699,6 +693,11 @@ function scene:create( event )
     sceneGroup:insert( exit )
   --sceneGroup:insert( grass)
     sceneGroup:insert( caravan )
+    sceneGroup:insert( crate[1] )
+    sceneGroup:insert( crate[2] )
+    sceneGroup:insert( lever )
+    sceneGroup:insert( lever2 )
+    sceneGroup:insert( flames )
 	--sceneGroup:insert( explodingThing )
 
 
@@ -751,6 +750,7 @@ function sendArnie()
 
   physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
   arnold.isFixedRotation = true
+  sceneGroup:insert(arnold)
 
 
   teleportIn()
