@@ -124,9 +124,12 @@ local arnoldMovements = {
   }
 
 local enemiesTemplate= {
+
       {x = 1600, y=90},
       {x = 600, y=800},
-      {x = 200, y=430},
+      {x = 150, y=430},
+      {x = 960, y=620},
+      {x = 1600, y=300},
     }
 
 local function canArnieKillSomeone()
