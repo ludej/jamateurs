@@ -654,7 +654,6 @@ local function teleportIn()
   transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
   transition.fadeIn(arnold, {
     time=500, delay=800, onComplete=function()
-    timer.resume(gameLoopTimer)
     arnold:setSequence("running")
     arnold:play()
     arnoldMover(1)
@@ -719,8 +718,7 @@ function scene:show( event )
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
-    timer.performWithDelay( 3000, spawnPlayer, 1 )
-	-- gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
+    timer.performWithDelay( 30000, spawnPlayer, 1 )
     shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
