@@ -680,12 +680,12 @@ function scene:create( event )
 	--sceneGroup:insert( explodingThing )
 
 
-    countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "deadpack", 40)
+    countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "MadeinChina", 40)
           countDownSecondsText:setFillColor(0)
           countDownSecondsText.x = 700
           countDownSecondsText.y = 110
 
-    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "deadpack", 40)
+    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "MadeinChina", 40)
           levelCounterText:setFillColor(0)
           levelCounterText.x = 1330
           levelCounterText.y = 110
@@ -732,7 +732,6 @@ function sendArnie()
 
 
   teleportIn()
-
 end
 
 
@@ -774,8 +773,7 @@ function scene:show( event )
         arnieCountdownTime = arnieDefaultCountdownTime
     end
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
-
-        Runtime:addEventListener( "collision", onCollision )
+     Runtime:addEventListener( "collision", onCollision )
 
     physics.start()
 
