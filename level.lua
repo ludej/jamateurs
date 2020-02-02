@@ -251,6 +251,7 @@ end
 local function fixCrate()
     crate[1].alpha = 1.0
     crate[2].alpha = 0
+    audio.play(utils.sounds["crate"])
 end
 
 
