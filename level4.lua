@@ -627,8 +627,8 @@ function scene:create( event )
     lever2.alpha = 0
 
     crate = { -- #1 whole crate, #2 broken crate
-        display.newImageRect( crateSheet1, 1, 110, 110),
-        display.newImageRect( crateSheet1, 2, 110, 110)}
+    display.newImageRect( crateSheet1, 1, 110, 110),
+    display.newImageRect( crateSheet1, 2, 110, 110)}
     crate[1].anchorX, crate[1].anchorY = 0, 1
     crate[2].anchorX, crate[2].anchorY = 0, 1
     crate[1].x, crate[1].y = 1300, 525
@@ -671,24 +671,33 @@ function scene:create( event )
   createExit("Images/Things/gate-closed.png")
 
 	-- create a grass object and add physics (with custom shape)
-	local grass = display.newImageRect( "grass.png", screenW, 82)
-	grass.anchorX = 0
-	grass.anchorY = 0
+	--local grass = display.newImageRect( "grass.png", screenW, 82)
+	--grass.anchorX = 0
+	--grass.anchorY = 0
 	--  draw the grass at the very bottom of the screen
-	grass.x, grass.y = display.screenOriginX, display.actualContentHeight + display.screenOriginY
+	--grass.x, grass.y = display.screenOriginX, display.actualContentHeight + display.screenOriginY
 
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
-	local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
-	physics.addBody( grass, "static", { friction=0.3 } )
+	--local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
+	--physics.addBody( grass, "static", { friction=0.3 } )
+    
+  local leftWall = display.newLine( 0, 0, 0, display.actualContentHeight )
+  leftWall.isVisible = false
+  leftWall.type = "wall"
+  physics.addBody(leftWall, "static",  {filter = {categoryBits = 4, maskBits = 7}})
 
-
+  local rightWall = display.newLine( display.actualContentWidth, 0, display.actualContentWidth,     display.actualContentHeight )
+  rightWall.isVisible = false
+  rightWall.type = "wall"
+  physics.addBody(rightWall, "static",  {filter = {categoryBits = 4, maskBits = 7}})
+    
     --sendArnie()
 
 
 
     sceneGroup:insert( entrancePortal )
     sceneGroup:insert( exit )
-	sceneGroup:insert( grass)
+  --sceneGroup:insert( grass)
     sceneGroup:insert( caravan )
 	--sceneGroup:insert( explodingThing )
 
