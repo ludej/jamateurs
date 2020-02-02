@@ -38,7 +38,7 @@ end
 -- 'onRelease' event listener for playBtn
 local function onPlayBtnRelease()
 	timer.cancel( backgroundTimer )
-	composer.gotoScene( "level4")
+	composer.gotoScene( "info")
 	return true	-- indicates successful touch
 end
 
@@ -96,7 +96,7 @@ function scene:hide( event )
 	local phase = event.phase
 
 	if event.phase == "will" then
-		audio.stop( backgroundMusicChannel )
+		--audio.stop( backgroundMusicChannel )
 		-- Called when the scene is on screen and is about to move off screen
 		--
 		-- INSERT code here to pause the scene
