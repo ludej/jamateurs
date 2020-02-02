@@ -11,7 +11,6 @@ local physics = require ("physics")
 local scene = composer.newScene()
 local sceneGroup
 
-
 local flames
 local arnold
 local caravan
@@ -38,7 +37,7 @@ local platforms = {}
 local platformCount = 0
 local enemies = {}
 local enemiesCount = 0
-local gameOverScreen, gameoverBackground
+local gameBackground,gameOverScreen, gameoverBackground
 local countDownSecondsText, countDownText, levelLegendText, levelCounterText
 
 
@@ -407,13 +406,15 @@ local function onKeyEvent( event )
 	end
 
 	if ((event.keyName == "up") and (event.phase == "down")) then
-        if player.sensorOverlaps > 0 then
-            -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
-            canDoubleJump = true
-            player:setLinearVelocity(0, -500)
-        elseif canDoubleJump then
-            canDoubleJump = false
-            player:setLinearVelocity(0, -500)
+        if player then
+            if player.sensorOverlaps > 0 then
+                -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
+                canDoubleJump = true
+                player:setLinearVelocity(0, -500)
+            elseif canDoubleJump then
+                canDoubleJump = false
+                player:setLinearVelocity(0, -500)
+            end
         end
 	end
 
@@ -560,7 +561,7 @@ function scene:create( event )
 	physics.setGravity(0, 20)
 	--physics.pause()
 
-  physics.setDrawMode("hybrid") -- shows the physics box around the object
+ -- physics.setDrawMode("hybrid") -- shows the physics box around the object
 
 
 
@@ -568,13 +569,8 @@ function scene:create( event )
 	-- the physical screen will likely be a different shape than our defined content area
 	-- since we are going to position the background from it's top, left corner, draw the
 	-- background at the real top, left corner.
-	local background = display.newRect( display.screenOriginX, display.screenOriginY, screenW, screenH )
-	background.anchorX = 0
-	background.anchorY = 0
-	background:setFillColor( .5 )
 
-
-    lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
 	lever.anchorX = 0
 	lever.anchorY = 1
 	lever.x, lever.y = 0, 225
@@ -627,8 +623,8 @@ function scene:create( event )
 
     --sendArnie()
 
-	-- all display objects must be inserted into group
-    sceneGroup:insert( background )
+
+
     sceneGroup:insert( entrancePortal )
     sceneGroup:insert( exit )
 	sceneGroup:insert( grass)
@@ -654,7 +650,6 @@ local function teleportIn()
   transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
   transition.fadeIn(arnold, {
     time=500, delay=800, onComplete=function()
-    timer.resume(gameLoopTimer)
     arnold:setSequence("running")
     arnold:play()
     arnoldMover(1)
@@ -699,6 +694,11 @@ function scene:show( event )
 	sceneGroup = self.view
 	local phase = event.phase
 
+  gameBackground = display.newImageRect(sceneGroup, "Images/Scene/background/bg_all.png",1920, 1080)
+  gameBackground.x = display.contentWidth*0.5
+  gameBackground.y = display.contentHeight*0.5
+  gameBackground:toBack()
+
 	if phase == "will" then
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
@@ -719,8 +719,7 @@ function scene:show( event )
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
-    timer.performWithDelay( 3000, spawnPlayer, 1 )
-	-- gameLoopTimer = timer.performWithDelay( 30, gameLoop, 0 )
+    timer.performWithDelay( 30000, spawnPlayer, 1 )
     shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     arnieCountdownTime = arnieDefaultCountdownTime
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
@@ -730,7 +729,7 @@ function scene:show( event )
 
     physics.start()
     createEnemy(1400,900,"enemy", -1)
-
+    sendArnie()
 
 	end
 end
