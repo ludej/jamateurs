@@ -196,7 +196,7 @@ end
 local function createExit(imageLocation)
     exit = display.newImageRect(imageLocation, 150, 150)
     exit.x, exit.y = 1818, 670
-    physics.addBody(exit, "static", { isSensor=true })
+    timer.performWithDelay(1, function() physics.addBody(exit, "static", { isSensor=true }) end, 1)
     exit.myName = "exit"
 end
 
@@ -585,7 +585,7 @@ function scene:create( event )
     lever = display.newImageRect( leverSheet1, 1, 110, 110)
 	lever.anchorX = 0
 	lever.anchorY = 1
-	lever.x, lever.y = -5, 180
+	lever.x, lever.y = -5, 200
     lever.myName = "lever"
 	physics.addBody( lever, "static", { isSensor=true } )
     lever.collision = objectCollide
@@ -594,7 +594,7 @@ function scene:create( event )
     lever2 = display.newImageRect( leverSheet1, 2, 110, 110)
     lever2.anchorX = 0
 	lever2.anchorY = 1
-	lever2.x, lever2.y = -5, 180
+	lever2.x, lever2.y = -5, 200
     lever2.alpha = 0
 
 
@@ -736,7 +736,7 @@ function scene:show( event )
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
-    timer.performWithDelay( 10000, spawnPlayer, 1 )
+    timer.performWithDelay( 3000, spawnPlayer, 1 )
     shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     if levelCounter == 0 then
         arnieCountdownTime = 2
