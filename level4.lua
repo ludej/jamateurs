@@ -290,13 +290,14 @@ function createEnemy(xPosition, yPosition, type, index)
     enemies[index]:play()
     timer.performWithDelay(1, function() physics.addBody( enemies[index], "dynamic", { density=1.0, friction=0.3, bounce=0, shape ={-90,-90 , 90,-90 , 90,100 , -90,100} } ) end, 1)
   elseif(type == "deadEnemy") then
+      display.remove(enemies[index])
      enemies[index]= display.newImageRect( "Images/Character/enemyDead.png", 200, 200)
      timer.performWithDelay(1, function() physics.addBody( enemies[index], "static", { isSensor = true } ) end, 1)
      enemies[index].collision = objectCollide
      enemies[index]:addEventListener( "collision" )
   end
   enemies[index].myName=type
-  enemies[index].enemyIndex=enemiesCount
+  enemies[index].enemyIndex=index
   enemies[index].x = xPosition
   enemies[index].y = yPosition
   enemies[index].isFixedRotation = true
@@ -305,15 +306,15 @@ function createEnemy(xPosition, yPosition, type, index)
   end
 
 local function enemyHit(enemy)
-  local x,y = enemy.x,enemy.y
-  display.remove(enemy)
+  local x,y = enemy.x,enemy.y  
   createEnemy(x,y,"deadEnemy", enemy.enemyIndex)
 end
 
 local function resurrectEnemy(enemy)
   local x,y = enemy.x,enemy.y
+  local enemyIndex = enemy.enemyIndex
   display.remove(enemy)
-  createEnemy(x,y,"enemy", enemy.enemyIndex)
+  createEnemy(x,y,"enemy", enemyIndex)
 end
 
 function leaveGame()
@@ -341,6 +342,7 @@ function leaveGame()
 
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
+  sceneGroup:removeSelf()
   composer.gotoScene("menu", "slideRight")
 end
 
