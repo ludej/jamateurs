@@ -204,8 +204,11 @@ end
 local function createExit(imageLocation)
     exit = display.newImageRect(imageLocation, 150, 150)
     exit.x, exit.y = 1818, 670
-    timer.performWithDelay(1, function() physics.addBody(exit, "static", { isSensor=true }) end, 1)
-    exit.myName = "exit"
+    timer.performWithDelay(1, function()
+        physics.addBody(exit, "static", { isSensor=true })
+        sceneGroup:insert( exit )
+        exit.myName = "exit"
+    end, 1)
 end
 
 local function toggleExit()
@@ -274,7 +277,7 @@ local function gameLoop()
         player:setSequence("idle")
         player:play()
     end
-      
+
 end
 
 local function shootLoop()
@@ -674,7 +677,7 @@ function scene:create( event )
 	-- define a shape that's slightly shorter than image bounds (set draw mode to "hybrid" or "debug" to see)
 	--local grassShape = {-halfW,-34, halfW,-34, halfW,34, -halfW,34,  }
 	--physics.addBody( grass, "static", { friction=0.3 } )
-    
+
   local leftWall = display.newLine( 0, 0, 0, display.actualContentHeight )
   leftWall.isVisible = false
   leftWall.type = "wall"
@@ -684,7 +687,7 @@ function scene:create( event )
   rightWall.isVisible = false
   rightWall.type = "wall"
   physics.addBody(rightWall, "static",  {filter = {categoryBits = 4, maskBits = 7}})
-    
+
     --sendArnie()
 
 
