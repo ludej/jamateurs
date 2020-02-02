@@ -61,8 +61,8 @@ local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieAnim.png", a
 
 local arnoldSequenceData = {
     {name="idle", start=1, count = 6, time=800, loopCount=0},
-    {name="jumping", start=7, count=6, time=575, loopCount=0},
-    {name="running", start=13, count=6, time=800, loopCount=0}
+    {name="jump", start=7, count=6, time=575, loopCount=0},
+    {name="run", start=13, count=6, time=800, loopCount=0}
   }
 
 local caravanSheetData = {width = 460, height = 310, numFrames = 2, sheetContentWidth = 920, sheetContentHeight= 310 }
@@ -149,9 +149,13 @@ local function arnoldMover()
   if(arnoldMoverIndex > #arnoldMovements or arnold ==nil or arnold.x == nil or gameEnded== true) then
     return
   end
-
+  
+  if(arnold.isPlaying) then
+    arnold:pause()
+  end
+  
   if(arnoldMovements[arnoldMoverIndex].action == "move") then
-    arnold:setSequence("running")
+    arnold:setSequence("run")
     arnold:play()
     if(arnoldMovements[arnoldMoverIndex].actionData >0) then
       arnold.xScale =1
@@ -163,25 +167,28 @@ local function arnoldMover()
     --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
     print("Arnold movement, type  move. Delta : ", arnoldMovements[arnoldMoverIndex].actionData)
   elseif(arnoldMovements[arnoldMoverIndex].action == "jump") then
-      arnold:setSequence("jumping")
+      arnold:setSequence("jump")
       arnold:play()
       audio.play( utils.sounds["jump"] )
       arnold:setLinearVelocity( 0, arnoldMovements[arnoldMoverIndex].actionData )
       print("Arnold movement, type  jump. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
-      arnoldMover(arnoldMoverIndex)
+      arnoldMover()
   elseif(arnoldMovements[arnoldMoverIndex].action == "shoot") then
       for i=1,arnoldMovements[arnoldMoverIndex].actionData do
         utils.fire(arnold)
       end
       print("Arnold movement, type  shoot. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
-      arnoldMover(arnoldMoverIndex)
+      arnoldMover()
     elseif(arnoldMovements[arnoldMoverIndex].action == "sound") then
       print("Arnold movement, type  sound. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
       audio.play(arnoldMovements[arnoldMoverIndex].actionData)
-      arnoldMover(arnoldMoverIndex)
+      arnoldMover()
     elseif(arnoldMovements[arnoldMoverIndex].action == "idle") then
+      arnold:setSequence("idle")
+      arnold:play()
       print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
       timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
+      
     end
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
