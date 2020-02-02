@@ -753,9 +753,9 @@ function sendArnie()
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
-       audio.play( utils.sounds["anrie_tot"] )
+       audio.play( utils.sounds["arnie_tot"] )
     end
-
+    break
   end
    if(arnold ~= nil) then
     display.remove(arnold)
