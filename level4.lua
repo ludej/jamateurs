@@ -454,8 +454,9 @@ local function onKeyEvent( event )
                     audio.play(utils.sounds["explosion"])
     			elseif playerInContactWith.myName == "deadEnemy" then
                     resurrectEnemy(playerInContactWith)
+                    playerInContactWith=nil
                 elseif playerInContactWith.myName == "crate" then
-                    fixCrate()
+                    fixCrate()                    
                 end
             end
 		end
