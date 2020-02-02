@@ -720,7 +720,7 @@ function scene:create( event )
     sceneGroup:insert( flames )
 
     countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "Grandstander", 40)
-          countDownSecondsText:setFillColor(0)
+          countDownSecondsText:setFillColor(1,0,0)
           countDownSecondsText.x = 700
           countDownSecondsText.y = 110
 
