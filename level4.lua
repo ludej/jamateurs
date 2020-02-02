@@ -732,7 +732,6 @@ function scene:show( event )
 
     physics.start()
 
-
 	end
 end
 
