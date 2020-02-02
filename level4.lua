@@ -117,7 +117,7 @@ local arnoldMovements = {
 local enemiesTemplate= {
       {x = 1600, y=90},
       {x = 600, y=800},
-      {x = 200, y=700},
+      {x = 200, y=430},
     }
 
 local function canArnieKillSomeone()
@@ -731,7 +731,6 @@ function scene:show( event )
         Runtime:addEventListener( "collision", onCollision )
 
     physics.start()
-
 
 	end
 end
