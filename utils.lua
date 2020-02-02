@@ -19,6 +19,7 @@ sounds["shooting"] = {
 sounds["jump"] = audio.loadSound( "sound/jump.wav" )
 sounds["hastaLaVista"] = audio.loadSound( "sound/hastaLaVista.wav" )
 sounds["enemyDeath"] = audio.loadSound( "sound/enemy_death.wav" )
+sounds["jumpArnold"] = audio.loadSound( "sound/arnie_jump.wav" )
 sounds["door"] = audio.loadSound( "sound/door.wav" )
 sounds["musicArnold"] = audio.loadStream( "music/arnie_main_theme.wav" )
 sounds["musicPlayer"] = audio.loadStream( "music/janitor_main_theme.wav" )
