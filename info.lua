@@ -11,7 +11,7 @@ local scene = composer.newScene()
 
 local function leave()
     audio.stop()
-    composer.gotoScene("level4")
+    composer.gotoScene("level")
 end
 
 --------------------------------------------
