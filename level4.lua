@@ -29,7 +29,7 @@ local arnoldMoverIndex =0
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, lever2, winch
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, lever2, winch, crate
 
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
@@ -67,6 +67,9 @@ local caravanSheet1 = graphics.newImageSheet("/Images/Things/caravan.png", carav
 
 local leverSheetData = {width = 210, height = 210, numFrames = 2, sheetContentWidth = 420, sheetContentHeight= 210 }
 local leverSheet1 = graphics.newImageSheet("/Images/Things/lever.png", caravanSheetData)
+
+local crateSheetData = {width = 210, height = 210, numFrames = 2, sheetContentWidth = 420, sheetContentHeight= 210 }
+local crateSheet1 = graphics.newImageSheet("/Images/Things/crate.png", crateSheetData)
 
 local flamesSheetData = {width = 200, height = 300, numFrames = 17, sheetContentWidth = 3400, sheetContentHeight= 300 }
 local flamesSheet1 = graphics.newImageSheet("/Images/Things/flamesAnim.png", flamesSheetData)
@@ -214,6 +217,17 @@ local function toggleExit()
 end
 
 
+local function breakCrate()
+    crate[1].alpha = 0
+    crate[2].alpha = 1.0
+end
+
+local function fixCrate()
+    crate[1].alpha = 1.0
+    crate[2].alpha = 0
+end
+
+
 local function objectCollide(self, event)
     if ( event.phase == "began" ) then
         if event.other.myName == "player" then
@@ -222,6 +236,8 @@ local function objectCollide(self, event)
             arnoldInContactWith = self
             if self.myName == "lever" then
                 toggleExit()
+            elseif self.myName == "crate" then
+                breakCrate()
             end
         end
     elseif ( event.phase == "ended" ) then
@@ -321,6 +337,8 @@ function leaveGame()
   display.remove(lever2)
   display.remove(winch)
   display.remove(flames)
+  display.remove(crate[1])
+  display.remove(crate[2])
 
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
@@ -436,10 +454,10 @@ local function onKeyEvent( event )
     			if playerInContactWith.myName == "lever" then
     				toggleExit()
                     audio.play(utils.sounds["explosion"])
-    			end
-                if playerInContactWith.myName == "deadEnemy" then
-                    print("In contact with enemy for resurrection")
+    			elseif playerInContactWith.myName == "deadEnemy" then
                     resurrectEnemy(playerInContactWith)
+                elseif playerInContactWith.myName == "crate" then
+                    fixCrate()
                 end
             end
 		end
@@ -597,6 +615,18 @@ function scene:create( event )
 	lever2.x, lever2.y = -5, 200
     lever2.alpha = 0
 
+    crate = { -- #1 whole crate, #2 broken crate
+        display.newImageRect( crateSheet1, 1, 110, 110),
+        display.newImageRect( crateSheet1, 2, 110, 110)}
+    crate[1].anchorX, crate[1].anchorY = 0, 1
+    crate[2].anchorX, crate[2].anchorY = 0, 1
+    crate[1].x, crate[1].y = 1300, 525
+    crate[2].x, crate[2].y = 1300, 525
+    crate[1].myName = "crate"
+    physics.addBody( crate[1], "static", { isSensor=true } )
+    crate[1].collision = objectCollide
+    crate[1]:addEventListener( "collision" )
+    crate[2].alpha = 0
 
 
     winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
