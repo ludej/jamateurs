@@ -40,6 +40,8 @@ local enemiesCount = 0
 local gameBackground,gameOverScreen, gameoverBackground
 local countDownSecondsText, levelCounterText
 
+local music
+
 
 local nw, nh
 local scaleX,scaleY = 0.5,0.5
@@ -149,11 +151,11 @@ local function arnoldMover()
   if(arnoldMoverIndex > #arnoldMovements or arnold ==nil or arnold.x == nil or gameEnded== true) then
     return
   end
-  
+
   if(arnold.isPlaying) then
     arnold:pause()
   end
-  
+
   if(arnoldMovements[arnoldMoverIndex].action == "move") then
     arnold:setSequence("run")
     arnold:play()
@@ -188,7 +190,7 @@ local function arnoldMover()
       arnold:play()
       print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
       timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
-      
+
     end
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
@@ -361,6 +363,7 @@ function leaveGame()
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
   sceneGroup:removeSelf()
+  audio.stop()
   composer.gotoScene("menu", "slideRight")
 end
 
@@ -406,6 +409,8 @@ local function onCollision( event )
                 transition.to(
                     arnold, {time=1000, alpha=0, width=10, height=10,
                     onComplete=function() display.remove(arnold) end} )
+                audio.stop()
+                music = audio.play( utils.sounds["musicPlayer"], { channel=1, loops=-1, fadein=1000 } )
             end
         end
         if (obj1.myName == "bullet" or obj2.myName == "bullet") then
@@ -760,6 +765,9 @@ function sendArnie()
   arnold.alpha = 0
   arnold.myName = "arnold"
 
+  audio.stop()
+  music = audio.play( utils.sounds["musicArnold"], { channel=1, loops=-1} )
+
   physics.addBody( arnold, "dynamic", { density=1.0, friction=0.3, bounce=0, shape={-nw,-nh,nw,-nh,nw,nh,-nw,nh} } )
   arnold.isFixedRotation = true
   sceneGroup:insert(arnold)
@@ -774,10 +782,12 @@ function scene:show( event )
 	sceneGroup = self.view
 	local phase = event.phase
 
-  gameBackground = display.newImageRect(sceneGroup, "Images/Scene/background/bg_all.png",1920, 1080)
-  gameBackground.x = display.contentWidth*0.5
-  gameBackground.y = display.contentHeight*0.5
-  gameBackground:toBack()
+    gameBackground = display.newImageRect(sceneGroup, "Images/Scene/background/bg_all.png",1920, 1080)
+    gameBackground.x = display.contentWidth*0.5
+    gameBackground.y = display.contentHeight*0.5
+    gameBackground:toBack()
+
+    music = audio.play( utils.sounds["musicPlayer"], { channel=1, loops=-1, fadein=1000 } )
 
 	if phase == "will" then
 		-- Called when the scene is still off screen and is about to move on screen
