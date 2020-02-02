@@ -16,6 +16,13 @@ local arnold
 local caravan
 
 local arnieDefaultCountdownTime = 18
+local arnieCurrentCountdownTime = arnieDefaultCountdownTime
+local arnieTimeLevelReducer = 4
+local arnieMinimalLevelTime = 16
+
+local defaultShootLoopTimer = 1000
+local shootLoopTimerReducer = 100
+local minimalShootLoopTimer = 100
 
 local levelCounter = 0
 local arnieCountdownTime
@@ -416,13 +423,12 @@ local function onCollision( event )
                 bullet, target = obj2, obj1
             end
             if target.myName ~= "arnold" then
-                --bullet:pause()
                 display.remove(bullet)
                 if target.myName == "player" then
-                    timer.cancel( gameLoopTimer )
-                    target:pause()
-                    display.remove(target)
-                    gameOver()
+                      timer.cancel( gameLoopTimer )
+                      target:pause()
+                      display.remove(target)
+                      gameOver()
                 elseif(target.myName == "enemy") then
                   enemyHit(target)
                 end
@@ -593,7 +599,21 @@ local function updateTime( event )
 
     if(arnieCountdownTime == 0) then
         sendArnie()
-        arnieCountdownTime = arnieDefaultCountdownTime
+        
+        arnieCurrentCountdownTime = arnieDefaultCountdownTime - ((levelCounter -1) * arnieTimeLevelReducer)   
+        print("Current level "..levelCounter)
+        print("CountdownTime "..arnieCurrentCountdownTime)
+        if(arnieCurrentCountdownTime< arnieMinimalLevelTime)then
+          arnieCountdownTime = arnieMinimalLevelTime
+          shootLoopTime = defaultShootLoopTimer  - ((levelCounter -1) * shootLoopTimerReducer )
+           if(shootLoopTime>= minimalShootLoopTimer) then
+             timer.cancel(shootLoopTimer)         
+              shootLoopTimer = timer.performWithDelay( shootLoopTime, shootLoop, 0 )
+             end          
+        else
+          arnieCountdownTime = arnieCurrentCountdownTime         
+        end      
+        
         countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
     end
 end
@@ -748,6 +768,7 @@ function sendArnie()
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
     end
+    
   end
    if(arnold ~= nil) then
     display.remove(arnold)
@@ -800,7 +821,7 @@ function scene:show( event )
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
     timer.performWithDelay( 1000, spawnPlayer, 1 )
-    shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
+    shootLoopTimer = timer.performWithDelay( defaultShootLoopTimer, shootLoop, 0 )
     if levelCounter == 0 then
         arnieCountdownTime = 2
     else
