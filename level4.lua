@@ -114,6 +114,12 @@ local arnoldMovements = {
     {action = "move", actionData = 220},
   }
 
+local enemiesTemplate= {
+      {x = 1600, y=90},
+      {x = 600, y=800},
+      {x = 200, y=700},
+    }
+
 local function canArnieKillSomeone()
    --print( "Checking hits" )
   if(arnold==nil or arnold.x == nil) then
@@ -659,6 +665,7 @@ function sendArnie()
     angryArnold = false
     arnoldMoverIndex =0
     levelCounter = levelCounter + 1
+    createEnemy(enemiesTemplate[levelCounter].x , enemiesTemplate[levelCounter].y, "enemy", -1)
     levelCounterText.text=levelCounter
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
@@ -724,8 +731,7 @@ function scene:show( event )
         Runtime:addEventListener( "collision", onCollision )
 
     physics.start()
-    createEnemy(1400,900,"enemy", -1)
-    sendArnie()
+
 
 	end
 end
