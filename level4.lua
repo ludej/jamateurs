@@ -55,11 +55,13 @@ local playerSequenceData = {
   }
 
 -- Arnold movement animation
-local arnoldSheetData = {width = 210, height = 210, numFrames = 6, sheetContentWidth = 1260, sheetContentHeight= 210 }
-local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieRun.png", arnoldSheetData)
+local arnoldSheetData = {width = 210, height = 210, numFrames = 18,}
+local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieAnim.png", arnoldSheetData)
 
 local arnoldSequenceData = {
-    {name="running", start=1, count=6, time=575, loopCount=0}
+    {name="idle", start=1, count = 6, time=800, loopCount=0},
+    {name="jumping", start=7, count=6, time=575, loopCount=0},
+    {name="running", start=13, count=6, time=800, loopCount=0}
   }
 
 local caravanSheetData = {width = 460, height = 310, numFrames = 2, sheetContentWidth = 920, sheetContentHeight= 310 }
@@ -142,6 +144,8 @@ local function arnoldMover()
   end
 
   if(arnoldMovements[arnoldMoverIndex].action == "move") then
+    arnold:setSequence("running")
+    arnold:play()
     if(arnoldMovements[arnoldMoverIndex].actionData >0) then
       arnold.xScale =1
     else
@@ -152,6 +156,8 @@ local function arnoldMover()
     --transition.to(arnold, {delay = 2000, x=arnold.x + arnoldMovements[index].delta, time=2000})
     print("Arnold movement, type  move. Delta : ", arnoldMovements[arnoldMoverIndex].actionData)
   elseif(arnoldMovements[arnoldMoverIndex].action == "jump") then
+      arnold:setSequence("jumping")
+      arnold:play()
       audio.play( utils.sounds["jump"] )
       arnold:setLinearVelocity( 0, arnoldMovements[arnoldMoverIndex].actionData )
       print("Arnold movement, type  jump. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
@@ -248,6 +254,7 @@ local function gameLoop()
         player:setSequence("idle")
         player:play()
     end
+      
 end
 
 local function shootLoop()
@@ -529,7 +536,7 @@ local function spawnPlayer()
 
     display.remove(caravan)
     caravan = display.newImageRect(caravanSheet1, 2, 405, 310)
-    caravan.x, caravan.y = 1700, 900
+    caravan.x, caravan.y = 1650, 900
     sceneGroup:insert( caravan )
 
     sceneGroup:insert( player )
@@ -576,12 +583,12 @@ function scene:create( event )
 	-- since we are going to position the background from it's top, left corner, draw the
 	-- background at the real top, left corner.
 
-  lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
-	lever.anchorX = 0
-	lever.anchorY = 1
-	lever.x, lever.y = 0, 225
+    lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+    lever.anchorX = 0
+    lever.anchorY = 1
+    lever.x, lever.y = 0, 225
     lever.myName = "lever"
-	physics.addBody( lever, "static", { isSensor=true } )
+    physics.addBody( lever, "static", { isSensor=true } )
     lever.collision = objectCollide
     lever:addEventListener( "collision" )
 
@@ -595,7 +602,7 @@ function scene:create( event )
     winch:addEventListener( "collision" )
 
     caravan = display.newImageRect(caravanSheet1, 1, 405, 310)
-    caravan.x, caravan.y = 1700, 900
+    caravan.x, caravan.y = 1650, 900
 
 
   flames = display.newSprite(flamesSheet1, flamesSequenceData)
@@ -653,7 +660,7 @@ local function teleportIn()
   transition.fadeIn(entrancePortal, { time=300, delay=500, onComplete=function() audio.play(utils.sounds["teleport"]) end} )
   transition.fadeIn(arnold, {
     time=500, delay=800, onComplete=function()
-    arnold:setSequence("running")
+    arnold:setSequence("idle")
     arnold:play()
     arnoldMover(1)
   end} )
@@ -734,7 +741,6 @@ function scene:show( event )
         Runtime:addEventListener( "collision", onCollision )
 
     physics.start()
-
 	end
 end
 
