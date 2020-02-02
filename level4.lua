@@ -603,12 +603,6 @@ function scene:create( event )
   flames:play()
   physics.addBody( flames, "static", { friction=0.3, shape ={-70,-90 , 70,-90 , 70,150 , -70,150} })
 
-  player = display.newSprite(playerSheet1, playerSequenceData)
-  player.x, player.y = 1820, 950
-  player.myName = "player"
-  player:setSequence("idle")
-  player:play()
-
   entrancePortal = display.newSprite(entrancePortalSheet1,entrancePortalSequenceData)
   entrancePortal.x, entrancePortal.y = 160, 781
   entrancePortal.alpha = 0
@@ -647,7 +641,7 @@ function scene:create( event )
     countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "MadeinChina", 56)
           countDownSecondsText.x = countDownText.x + countDownText.width/2 + 25
           countDownSecondsText.y = 50
-          
+
   levelLegendText = display.newText(sceneGroup, "Level: ", 0,0, "MadeinChina", 56)
           levelLegendText.x = countDownSecondsText.x + countDownSecondsText.width/2 + 130
           levelLegendText.y = 50
@@ -685,7 +679,7 @@ function sendArnie()
    end
 
    arnold = display.newSprite(arnoldSheet1, arnoldSequenceData)
-  --arnold:scale(0.5,0.5) 
+  --arnold:scale(0.5,0.5)
   nw, nh = arnold.width*scaleX*0.85, arnold.height*scaleY*0.8
   arnold.x, arnold.y = entrancePortal.x, entrancePortal.y
   arnold.alpha = 0
