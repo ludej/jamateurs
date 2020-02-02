@@ -2,7 +2,7 @@ local utils = {}
 
  -- Bullet  animation
 local bulletSheetData = {width = 210, height = 210, numFrames = 3, sheetContentWidth = 630, sheetContentHeight= 210 }
-local bulletSheet = graphics.newImageSheet("/Images/Things/bulletAnim.png", bulletSheetData)
+local bulletSheet = graphics.newImageSheet("Images/Things/bulletAnim.png", bulletSheetData)
 
 
 local bulletSequenceData = {
@@ -27,11 +27,11 @@ local function fire(shooter)
     physics.addBody(bullet, "dynamic", {isSensor=true})
     bullet.isBullet = true
     bullet.myName = "bullet"
-    bullet.x = shooter.x + 100
+    bullet.x = shooter.x + (shooter.xScale * 100)
     bullet.y = shooter.y
     --bullet:setSequence("fly")
     --bullet:play()
-    transition.to(bullet, {x=5000, time=2000, onComplete = function() display.remove(bullet) end})
+    transition.to(bullet, {x=(shooter.xScale * 5000), time=2000, onComplete = function() display.remove(bullet) end})
     audio.play(utils.sounds["shooting"][math.random(1, #utils.sounds["shooting"])])
 end
 utils.fire = fire

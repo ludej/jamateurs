@@ -29,7 +29,7 @@ local arnoldMoverIndex =0
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local leftPressed, rightPressed
-local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, winch
+local player, entrancePortal, exit, exitIsOpen, explodingThing, lever, lever2, winch, crate
 
 local playerInContactWith, arnoldInContactWith = nil
 local canDoubleJump
@@ -47,7 +47,7 @@ local scaleX,scaleY = 0.5,0.5
 
 -- Character movement animation
 local playerSheetData = {width = 210, height = 210, numFrames = 10, sheetContentWidth = 2100, sheetContentHeight= 210 }
-local playerSheet1 = graphics.newImageSheet("/Images/Character/heroAnim.png", playerSheetData)
+local playerSheet1 = graphics.newImageSheet("Images/Character/heroAnim.png", playerSheetData)
 
 local playerSequenceData = {
     {name="idle", start=1, count=4, time=800, loopCount=0},
@@ -55,6 +55,7 @@ local playerSequenceData = {
   }
 
 -- Arnold movement animation
+
 local arnoldSheetData = {width = 210, height = 210, numFrames = 18,}
 local arnoldSheet1 = graphics.newImageSheet("/Images/Character/arnieAnim.png", arnoldSheetData)
 
@@ -65,17 +66,23 @@ local arnoldSequenceData = {
   }
 
 local caravanSheetData = {width = 460, height = 310, numFrames = 2, sheetContentWidth = 920, sheetContentHeight= 310 }
-local caravanSheet1 = graphics.newImageSheet("/Images/Things/caravan.png", caravanSheetData)
+local caravanSheet1 = graphics.newImageSheet("Images/Things/caravan.png", caravanSheetData)
+
+local leverSheetData = {width = 210, height = 210, numFrames = 2, sheetContentWidth = 420, sheetContentHeight= 210 }
+local leverSheet1 = graphics.newImageSheet("Images/Things/lever.png", caravanSheetData)
+
+local crateSheetData = {width = 210, height = 210, numFrames = 2, sheetContentWidth = 420, sheetContentHeight= 210 }
+local crateSheet1 = graphics.newImageSheet("Images/Things/crate.png", crateSheetData)
 
 local flamesSheetData = {width = 200, height = 300, numFrames = 17, sheetContentWidth = 3400, sheetContentHeight= 300 }
-local flamesSheet1 = graphics.newImageSheet("/Images/Things/flamesAnim.png", flamesSheetData)
+local flamesSheet1 = graphics.newImageSheet("Images/Things/flamesAnim.png", flamesSheetData)
 
 local flamesSequenceData = {
     {name="burning", start=1, count=17, time=1500, loopCount=0}
   }
 
 local entrancePortalSheetData = {width = 300, height = 300, numFrames = 12, sheetContentWidth = 3600, sheetContentHeight= 300 }
-local entrancePortalSheet1 = graphics.newImageSheet("/Images/Things/portalAnim.png", entrancePortalSheetData)
+local entrancePortalSheet1 = graphics.newImageSheet("Images/Things/portalAnim.png", entrancePortalSheetData)
 
 local entrancePortalSequenceData = {
     {name="beaming", start=1, count=12, time=1300, loopCount=0}
@@ -83,7 +90,7 @@ local entrancePortalSequenceData = {
 
   -- Enemy idle animation
 local enemyIdleSheetData = {width = 210, height = 210, numFrames = 7, sheetContentWidth = 1470, sheetContentHeight= 210 }
-local enemyIdleSheet = graphics.newImageSheet("/Images/Character/enemyIdle.png", enemyIdleSheetData)
+local enemyIdleSheet = graphics.newImageSheet("Images/Character/enemyIdle.png", enemyIdleSheetData)
 
 
 local enemyIdleSequenceData = {
@@ -128,11 +135,11 @@ local function canArnieKillSomeone()
     return
   end
 
-  local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + 1000, arnold.y, "closest" )
+  local hits = physics.rayCast( arnold.x, arnold.y, arnold.x + (arnold.xScale * 1000), arnold.y, "closest" )
   if ( hits ) then
 
     if (hits[1].object.myName == "player" or hits[1].object.myName == "enemy") then
-    utils.fire(arnold)
+        utils.fire(arnold)
     end
   end
 end
@@ -164,7 +171,6 @@ local function arnoldMover()
       arnoldMover(arnoldMoverIndex)
   elseif(arnoldMovements[arnoldMoverIndex].action == "shoot") then
       for i=1,arnoldMovements[arnoldMoverIndex].actionData do
-
         utils.fire(arnold)
       end
       print("Arnold movement, type  shoot. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
@@ -176,7 +182,6 @@ local function arnoldMover()
     elseif(arnoldMovements[arnoldMoverIndex].action == "idle") then
       print("Arnold movement, type  idle. actionData : ", arnoldMovements[arnoldMoverIndex].actionData)
       timer.performWithDelay( arnoldMovements[arnoldMoverIndex].actionData, arnoldMover, 1 )
-
     end
   --ArnoldMovement(index+1)
   --transition.to(arnold, {x=20000, time=5000, onComplete = function() display.remove(bullet) end})
@@ -199,7 +204,7 @@ end
 local function createExit(imageLocation)
     exit = display.newImageRect(imageLocation, 150, 150)
     exit.x, exit.y = 1818, 670
-    physics.addBody(exit, "static", { isSensor=true })
+    timer.performWithDelay(1, function() physics.addBody(exit, "static", { isSensor=true }) end, 1)
     exit.myName = "exit"
 end
 
@@ -207,11 +212,24 @@ local function toggleExit()
     display.remove(exit)
     if exitIsOpen then
         exitIsOpen = false
+        lever.alpha, lever2.alpha = 1.0, 0
         createExit("Images/Things/gate-closed.png")
     else
         exitIsOpen = true
+        lever.alpha, lever2.alpha = 0, 1.0
         createExit("Images/Things/gate-open.png")
     end
+end
+
+
+local function breakCrate()
+    crate[1].alpha = 0
+    crate[2].alpha = 1.0
+end
+
+local function fixCrate()
+    crate[1].alpha = 1.0
+    crate[2].alpha = 0
 end
 
 
@@ -223,6 +241,8 @@ local function objectCollide(self, event)
             arnoldInContactWith = self
             if self.myName == "lever" then
                 toggleExit()
+            elseif self.myName == "crate" then
+                breakCrate()
             end
         end
     elseif ( event.phase == "ended" ) then
@@ -258,11 +278,13 @@ local function gameLoop()
 end
 
 local function shootLoop()
-  if(angryArnold) then
-    utils.fireAtPlayer(arnold,player)
-  end
-
-  canArnieKillSomeone()
+    -- CHeck if Arnold exists and is fully spawned, before he can fire
+    if arnold and arnold.alpha == 1 then
+        if(angryArnold) then
+            utils.fireAtPlayer(arnold,player)
+        end
+        canArnieKillSomeone()
+    end
 end
 
 function createEnemy(xPosition, yPosition, type, index)
@@ -320,8 +342,11 @@ function leaveGame()
   display.remove(arnold)
   display.remove(exit)
   display.remove(lever)
+  display.remove(lever2)
   display.remove(winch)
   display.remove(flames)
+  display.remove(crate[1])
+  display.remove(crate[2])
 
   display.remove(gameOverScreen)
   display.remove(gameoverBackground)
@@ -437,10 +462,11 @@ local function onKeyEvent( event )
     			if playerInContactWith.myName == "lever" then
     				toggleExit()
                     audio.play(utils.sounds["explosion"])
-    			end
-                if playerInContactWith.myName == "deadEnemy" then
-                    print("In contact with enemy for resurrection")
+    			elseif playerInContactWith.myName == "deadEnemy" then
                     resurrectEnemy(playerInContactWith)
+                    playerInContactWith=nil
+                elseif playerInContactWith.myName == "crate" then
+                    fixCrate()
                 end
             end
 		end
@@ -583,14 +609,36 @@ function scene:create( event )
 	-- since we are going to position the background from it's top, left corner, draw the
 	-- background at the real top, left corner.
 
-    lever = display.newImageRect( "Images/Scene/lever.png", 50, 50)
+
+    lever = display.newImageRect( leverSheet1, 1, 110, 110)
     lever.anchorX = 0
     lever.anchorY = 1
-    lever.x, lever.y = 0, 225
+    lever.x, lever.y = -5, 200
+
     lever.myName = "lever"
     physics.addBody( lever, "static", { isSensor=true } )
     lever.collision = objectCollide
     lever:addEventListener( "collision" )
+
+    lever2 = display.newImageRect( leverSheet1, 2, 110, 110)
+    lever2.anchorX = 0
+	lever2.anchorY = 1
+	lever2.x, lever2.y = -5, 200
+    lever2.alpha = 0
+
+    crate = { -- #1 whole crate, #2 broken crate
+        display.newImageRect( crateSheet1, 1, 110, 110),
+        display.newImageRect( crateSheet1, 2, 110, 110)}
+    crate[1].anchorX, crate[1].anchorY = 0, 1
+    crate[2].anchorX, crate[2].anchorY = 0, 1
+    crate[1].x, crate[1].y = 1300, 525
+    crate[2].x, crate[2].y = 1300, 525
+    crate[1].myName = "crate"
+    physics.addBody( crate[1], "static", { isSensor=true } )
+    crate[1].collision = objectCollide
+    crate[1]:addEventListener( "collision" )
+    crate[2].alpha = 0
+
 
     winch = display.newImageRect( "Images/Scene/winch.png", 50, 50)
     winch.anchorX = 0
@@ -645,12 +693,12 @@ function scene:create( event )
 	--sceneGroup:insert( explodingThing )
 
 
-    countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "MadeinChina", 56)
+    countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "Grandstander", 40)
           countDownSecondsText:setFillColor(0)
           countDownSecondsText.x = 700
           countDownSecondsText.y = 110
 
-    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "MadeinChina", 66)
+    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "Grandstander", 40)
           levelCounterText:setFillColor(0)
           levelCounterText.x = 1330
           levelCounterText.y = 110
@@ -672,7 +720,9 @@ function sendArnie()
     angryArnold = false
     arnoldMoverIndex =0
     levelCounter = levelCounter + 1
-    createEnemy(enemiesTemplate[levelCounter].x , enemiesTemplate[levelCounter].y, "enemy", -1)
+    if (levelCounter <= #enemiesTemplate) then
+      createEnemy(enemiesTemplate[levelCounter].x , enemiesTemplate[levelCounter].y, "enemy", -1)
+    end
     levelCounterText.text=levelCounter
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
@@ -695,7 +745,6 @@ function sendArnie()
 
 
   teleportIn()
-
 end
 
 
@@ -729,7 +778,7 @@ function scene:show( event )
 	rightPressed = false
     exitIsOpen = false
 	Runtime:addEventListener( "key", onKeyEvent )
-    timer.performWithDelay( 10000, spawnPlayer, 1 )
+    timer.performWithDelay( 1000, spawnPlayer, 1 )
     shootLoopTimer = timer.performWithDelay( 1000, shootLoop, 0 )
     if levelCounter == 0 then
         arnieCountdownTime = 2
@@ -737,8 +786,7 @@ function scene:show( event )
         arnieCountdownTime = arnieDefaultCountdownTime
     end
     countDownTimer = timer.performWithDelay( 1000, updateTime, arnieCountdownTime )
-
-        Runtime:addEventListener( "collision", onCollision )
+     Runtime:addEventListener( "collision", onCollision )
 
     physics.start()
 	end
