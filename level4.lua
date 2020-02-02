@@ -209,7 +209,7 @@ local function objectCollide(self, event)
             playerInContactWith = self
         elseif event.other.myName == "arnold" then
             arnoldInContactWith = self
-            if self.myName == "switch" then
+            if self.myName == "lever" then
                 toggleExit()
             end
         end
@@ -406,13 +406,15 @@ local function onKeyEvent( event )
 	end
 
 	if ((event.keyName == "up") and (event.phase == "down")) then
-        if player.sensorOverlaps > 0 then
-            -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
-            canDoubleJump = true
-            player:setLinearVelocity(0, -500)
-        elseif canDoubleJump then
-            canDoubleJump = false
-            player:setLinearVelocity(0, -500)
+        if player then
+            if player.sensorOverlaps > 0 then
+                -- player:applyLinearImpulse( 0, -0.75, player.x, player.y )
+                canDoubleJump = true
+                player:setLinearVelocity(0, -500)
+            elseif canDoubleJump then
+                canDoubleJump = false
+                player:setLinearVelocity(0, -500)
+            end
         end
 	end
 
@@ -622,7 +624,7 @@ function scene:create( event )
     --sendArnie()
 
 
-    
+
     sceneGroup:insert( entrancePortal )
     sceneGroup:insert( exit )
 	sceneGroup:insert( grass)
@@ -687,7 +689,7 @@ end
 function scene:show( event )
 	sceneGroup = self.view
 	local phase = event.phase
-  
+
   gameBackground = display.newImageRect(sceneGroup, "Images/Scene/background/bg_all.png",1920, 1080)
   gameBackground.x = display.contentWidth*0.5
   gameBackground.y = display.contentHeight*0.5
