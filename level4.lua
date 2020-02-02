@@ -16,6 +16,7 @@ local flames
 local arnold
 
 local arnieDefaultCountdownTime = 15
+local levelCounter = 0
 local arnieCountdownTime
 local countDownTimer
 local gameLoopTimer
@@ -36,6 +37,7 @@ local platformCount = 0
 local enemies = {}
 local enemiesCount = 0
 local gameOverScreen, gameoverBackground
+local countDownSecondsText, countDownText, levelLegendText, levelCounterText
 
 
 local nw, nh
@@ -514,6 +516,7 @@ function scene:create( event )
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
 
 	local sceneGroup = self.view
+  levelCounter = 0
 
 	-- We need physics started to add bodies, but we don't want the simulaton
 	-- running until the scene is on the screen.
@@ -647,6 +650,13 @@ function scene:create( event )
     countDownSecondsText = display.newText(sceneGroup,arnieDefaultCountdownTime , 0,0, "MadeinChina", 56)
           countDownSecondsText.x = countDownText.x + countDownText.width/2 + 25
           countDownSecondsText.y = 50
+          
+  levelLegendText = display.newText(sceneGroup, "Level: ", 0,0, "MadeinChina", 56)
+          levelLegendText.x = countDownSecondsText.x + countDownSecondsText.width/2 + 130
+          levelLegendText.y = 50
+    levelCounterText = display.newText(sceneGroup,levelCounter , 0,0, "MadeinChina", 56)
+          levelCounterText.x = levelLegendText.x + levelLegendText.width/2 + 25
+          levelCounterText.y = 50
 end
 
 local function teleportIn()
@@ -665,6 +675,8 @@ end
 function sendArnie()
     angryArnold = false
     arnoldMoverIndex =0
+    levelCounter = levelCounter + 1
+    levelCounterText.text=levelCounter
     for i=1,#enemies do
     if(enemies[i] and enemies[i].myName=="deadEnemy") then
        angryArnold = true
